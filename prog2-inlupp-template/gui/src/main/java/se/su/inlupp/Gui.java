@@ -12,6 +12,7 @@ public class Gui extends Application {
   public void start(Stage stage) {
     Graph<String> graph = new ListGraph<String>();
     String javaVersion = System.getProperty("java.version");
+    
     String javafxVersion = System.getProperty("javafx.version");
     Label label =
         new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
