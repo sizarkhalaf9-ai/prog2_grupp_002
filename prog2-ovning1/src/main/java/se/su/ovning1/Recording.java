@@ -32,22 +32,6 @@ public abstract class Recording extends Item implements PriceableWithVAT25 {
     }
 
     public double getPrice() {
-        // double value = originalPrice * (condition/10.0);
-
-        /*
-         * if(value < 10){
-         * return 10 * (condition / 10.0);
-         * } else {
-         * return value * (condition / 10.0);
-         * }
-         */
-
-        /*
-         * double value = (price < 10) ? 10 : price * condition / 10.0;
-         * 
-         * return value;
-         */
-
         double value = price * condition / 10.0;
 
         return (value < 10) ? 10 : value;
@@ -57,15 +41,8 @@ public abstract class Recording extends Item implements PriceableWithVAT25 {
 
     public String toString() {
 
-        // return getType() + ” { name='" + getName() + "', artist='" + artist + "',
-        // year=" + year + ", condition=" + condition + ", original price=" + price + ",
-        // price+VAT=" + " }”;
-
-        return "CD { name='" + getName() + "', artist='" + artist + "', year=" + year + ", condition=" + condition
-                + ", original price=" + price + ", price+VAT=" + " }";
-
-        // return (namn) = getName() ", " + artist + ", " + year + ", " + condition + ",
-        // " + price + ", " + getPrice() + ", " + getPriceWithVAT();
+        return getType() + " { name='" + getName() + "', artist='" + artist + "', year=" + year + ", condition=" + condition
+                + ", original price=" + price + "price=" + getPrice() + ", price+VAT=" + getPriceWithVAT() + " }";
     }
     // Kolla på toString metoden!
 
