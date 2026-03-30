@@ -2,7 +2,7 @@ package se.su.ovning1;
 
 import java.util.List;
 import java.util.ArrayList;
-//HEJ HEJ IGEN
+
 public class Order {
 
     private final long orderNumber;
