@@ -15,7 +15,6 @@ public class Order {
         for (Item i : items) {
             this.items.add(i);
         }
-
         this.orderNumber = counter++;
     }
 
@@ -25,7 +24,6 @@ public class Order {
             sum += i.getPrice();
         }
         return sum;
-
     }
 
     public double getTotalValuePlusVAT() {
