@@ -44,8 +44,4 @@ public abstract class Recording extends Item implements PriceableWithVAT25 {
         return getType() + " { name='" + getName() + "', artist='" + artist + "', year=" + year + ", condition=" + condition
                 + ", original price=" + price + "price=" + getPrice() + ", price+VAT=" + getPriceWithVAT() + " }";
     }
-    // Kolla på toString metoden!
-
-    // kan man använda instanceof?
-
 }

@@ -15,11 +15,7 @@ public class Main {
 
         Order order1 = new Order(book1, book2bound);
 
-        System.out.println("-----------");
-
-        System.out.println(book1);
-
-/*        System.out.println(order1.getReceipt());
+        System.out.println(order1.getReceipt());
 
         /*
          * Receipt for order #1
@@ -33,7 +29,7 @@ public class Main {
          * -----------
          */
 
-        /*Order jazz = new Order(book2, item1, cd2);
+        Order jazz = new Order(book2, item1, cd2);
         System.out.println(jazz.getReceipt());
 
         /*
@@ -50,7 +46,7 @@ public class Main {
          * -----------
          */
 
-        /*Order modernIndie = new Order(lp1, lp2, lp3);
+        Order modernIndie = new Order(lp1, lp2, lp3);
         System.out.println(modernIndie.getReceipt());
 
         /*
