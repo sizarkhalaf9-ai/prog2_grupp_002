@@ -12,13 +12,13 @@ public class Book extends Item implements PriceableWithVAT6 {
         this.bound = bound;
     }
 
-    public String getAuthor(){
+    /* public String getAuthor(){
         return author;
     }
     
-    public boolean getBound(){
+   public boolean getBound(){
         return bound;
-        }
+        }  */
 
     public double getPrice() {
         if (bound) {
@@ -28,9 +28,9 @@ public class Book extends Item implements PriceableWithVAT6 {
         }
     }
 
-    public String getType(){
+   /*  public String getType(){
         return "Book";
-        }
+        } */
 
     public String toString() {
         return getName() + ", " + author + ", " + getPrice() + ", " + bound;

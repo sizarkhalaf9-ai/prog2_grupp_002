@@ -39,7 +39,7 @@ public class Order {
         String kvittoDel2 = "";
         for (Item item : items) {
             if (item instanceof Book) {
-                kvittoDel2 += ((Book) item).getType() + " { name='" + item.getName() + "', author='" + ((Book) item).getAuthor() + "', bound=" + ((Book) item).getBound() + ",\nprice=" + ((Book) item).getPrice() + ", price+VAT=" + item.getPriceWithVAT() + " }\n";
+                kvittoDel2 += ((Book) item).toString();
             } else if (item instanceof CompactDisc) {
                 CompactDisc CD = (CompactDisc) item;
                 kvittoDel2 += CD.getType() +  " { name='" + CD.getName() + "', artist='" + CD.getArtist() + "', year=" + CD.getYear() + ", condition=" + CD.getCondition() + "\noriginal price=" + CD.getOriginalPrice() + ", price=" + CD.getPrice() + ", price+VAT=" + CD.getPriceWithVAT() + " }\n";

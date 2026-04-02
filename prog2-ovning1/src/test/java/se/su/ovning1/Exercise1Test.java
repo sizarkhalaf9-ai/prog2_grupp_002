@@ -33,7 +33,7 @@ public class Exercise1Test {
     @ParameterizedTest
     @org.junit.jupiter.api.Order(10)
     @DisplayName("Book: testar att inbundna böcker får rätt pris / testing that bound books are given the correct price.")
-    @CsvSource({"100.0,130.0,137.8", "0.0,0.0,0.0"})
+    @CsvSource({ "100.0,130.0,137.8", "0.0,0.0,0.0" })
     void boundBookCorrectPrice(double price, double expectedPrice, double expectedPricePlusVat) {
         var book = new Book("A Name", "An Author", price, true);
         assertEquals(0.06, book.getVAT(), INCORRECT_VAT_VALUE);
@@ -44,7 +44,7 @@ public class Exercise1Test {
     @ParameterizedTest
     @org.junit.jupiter.api.Order(11)
     @DisplayName("Book: testar att icke inbundna böcker får rätt pris / testing that non-bound books are given the correct price.")
-    @CsvSource({"100.0,100.0,106.0", "0.0,0.0,0.0"})
+    @CsvSource({ "100.0,100.0,106.0", "0.0,0.0,0.0" })
     void unboundBookCorrectPrice(double price, double expectedPrice, double expectedPricePlusVat) {
         var book = new Book("A Name", "An Author", price, false);
         assertEquals(expectedPrice, book.getPrice(), BOUND_BOOK_INCORRECT_VALUE_EXCL_VAT);
@@ -54,12 +54,14 @@ public class Exercise1Test {
     @ParameterizedTest
     @org.junit.jupiter.api.Order(12)
     @DisplayName("Book: testar att toString innehåller nödvändig information.")
-    @CsvSource({"For Whom The Bell Tolls, Ernest Hemingway, 125.0, true",
-        "William Gibson, Neuromancer, 200.0, false"})
+    @CsvSource({ "For Whom The Bell Tolls, Ernest Hemingway, 125.0, true",
+            "William Gibson, Neuromancer, 200.0, false" })
     void bookCorrectToString(String title, String author, double price, boolean bound) {
         var book = new Book(title, author, price, bound);
         var parts = Set.of(title, author, ("" + (bound ? price * 1.3 : price)), String.valueOf(bound));
-        var message = String.format("Klassen Book: toString saknar information. Letade efter %s i strängen '%s' men något saknades.", parts, book);
+        var message = String.format(
+                "Klassen Book: toString saknar information. Letade efter %s i strängen '%s' men något saknades.", parts,
+                book);
         assertTrue(parts.stream().allMatch(s -> book.toString().contains(s)), message);
     }
 
@@ -69,7 +71,8 @@ public class Exercise1Test {
     void bookHasCorrectFields() {
         var bookClass = Book.class;
         var fields = bookClass.getDeclaredFields();
-        var hasCorrectFieldNames = Arrays.stream(fields).map(Field::getName).collect(Collectors.toSet()).containsAll(Set.of("author", "bound", "price"));
+        var hasCorrectFieldNames = Arrays.stream(fields).map(Field::getName).collect(Collectors.toSet())
+                .containsAll(Set.of("author", "bound", "price"));
         assertTrue(fields.length >= 3, "Klassen ska innehålla minst tre medlemsvariabler.");
         assertTrue(hasCorrectFieldNames, "Klassen innehåller inte rätt medlemsvariabler.");
     }
@@ -95,7 +98,8 @@ public class Exercise1Test {
         var methods = bookClass.getDeclaredMethods();
         var pubMethods = Arrays.stream(methods).filter(method -> Modifier.isPublic(method.getModifiers())).count();
 
-        assertEquals(2, pubMethods, "Enligt klassdiagrammet ska klassen ha exakt två publika metoder utöver konstruktorn.");
+        assertEquals(2, pubMethods,
+                "Enligt klassdiagrammet ska klassen ha exakt två publika metoder utöver konstruktorn.");
 
         try {
             bookClass.getDeclaredMethod("getPrice");
@@ -115,7 +119,8 @@ public class Exercise1Test {
         var constructorType = constructor.getParameters()[0].getType();
 
         assertEquals(1, constructors.length, "Enligt klassdiagrammet ska det bara finnas en enda konstruktor.");
-        assertEquals(1, constructorParameters, "Den enda konstruktorn ska enligt klassdiagrammet bara ha en enda parameter.");
+        assertEquals(1, constructorParameters,
+                "Den enda konstruktorn ska enligt klassdiagrammet bara ha en enda parameter.");
         assertEquals(String.class, constructorType, "Den enda konstruktorns enda parameter har inte rätt typ.");
     }
 
@@ -163,15 +168,17 @@ public class Exercise1Test {
     @DisplayName("Item: testar att klassen inte kan instansieras.")
     void itemIsAbstract() {
         assertTrue(ReflectionUtils.isPublic(Item.class), "Klassen Item ska vara publik");
-        assertTrue(ReflectionUtils.isAbstract(Item.class), "Klassen Item ska vara abstrakt och inte kunna instansieras.");
+        assertTrue(ReflectionUtils.isAbstract(Item.class),
+                "Klassen Item ska vara abstrakt och inte kunna instansieras.");
     }
 
     @ParameterizedTest
     @org.junit.jupiter.api.Order(20)
     @DisplayName("Recording: testar att CompactDisc får rätt pris.")
-    @CsvSource({"2021,10,200,200,250", "2021,5,200,100,125", "2021,1,200,20,25", "2021,0,200,10,12.5"})
+    @CsvSource({ "2021,10,200,200,250", "2021,5,200,100,125", "2021,1,200,20,25", "2021,0,200,10,12.5" })
     void recordingCorrectPriceForCD(int year, int condition, double price, double expected, double plusVat) {
-        var message = String.format("Klassen CompactDisc: värdet (exkl. moms) på en CD beräknas inte rätt för slitage %d.", condition);
+        var message = String.format(
+                "Klassen CompactDisc: värdet (exkl. moms) på en CD beräknas inte rätt för slitage %d.", condition);
 
         var cdCond10 = new CompactDisc("A Name", "An Artist", year, condition, price);
 
@@ -183,9 +190,10 @@ public class Exercise1Test {
     @ParameterizedTest
     @org.junit.jupiter.api.Order(21)
     @DisplayName("Recording: testar att LongPlay får rätt pris.")
-    @CsvSource({"2025,10,200,200,250", "2025,5,200,100,125", "2025,1,200,20,25", "2025,0,200,10,12.5"})
+    @CsvSource({ "2026,10,200,200,250", "2026,5,200,100,125", "2026,1,200,20,25", "2026,0,200,10,12.5" })
     void recordingCorrectPriceForLP(int year, int condition, double price, double expected, double plusVat) {
-        var message = String.format("Klassen LongPlay: värdet (exkl. moms) på en LP beräknas inte rätt för slitage %d.", condition);
+        var message = String.format("Klassen LongPlay: värdet (exkl. moms) på en LP beräknas inte rätt för slitage %d.",
+                condition);
 
         var item = new LongPlay("A Name", "An Artist", year, condition, price);
 
@@ -196,9 +204,11 @@ public class Exercise1Test {
     @ParameterizedTest
     @org.junit.jupiter.api.Order(22)
     @DisplayName("Recording: testar att äldre LongPlay får rätt pris.")
-    @CsvSource({"2020,10,200,225,281.25", "1950,10,200,575,718.75"})
+    @CsvSource({ "2020,10,200,230,287.25", "1950,10,200,580,725" })
     void recordingCorrectPriceForLPFrom2020(int year, int condition, double price, double expected, double plusVat) {
-        var message = String.format("Klassen LongPlay: värdet (exkl. moms) på en LP från " + year + " beräknas inte rätt för slitage %d.", condition);
+        var message = String.format(
+                "Klassen LongPlay: värdet (exkl. moms) på en LP från " + year + " beräknas inte rätt för slitage %d.",
+                condition);
 
         var item = new LongPlay("A Name", "An Artist", year, condition, price);
 
@@ -209,14 +219,20 @@ public class Exercise1Test {
     @ParameterizedTest
     @org.junit.jupiter.api.Order(23)
     @DisplayName("Recording: testar att toString innehåller nödvändig information för CD.")
-    @CsvSource({"Phoebe Bridgers, Punisher, 2023, 10, 200, 200, 250", "Bruce Springsteen, The River, 1980, 10, 300, 300, 375"})
-    void recordingCorrectToStringCD(String artist, String title, int year, int condition, double originalPrice, double price, double pricePlusVAT) {
+    @CsvSource({ "Phoebe Bridgers, Punisher, 2023, 10, 200, 200, 250",
+            "Bruce Springsteen, The River, 1980, 10, 300, 300, 375" })
+    void recordingCorrectToStringCD(String artist, String title, int year, int condition, double originalPrice,
+            double price, double pricePlusVAT) {
         var item1 = new CompactDisc(title, artist, year, condition, originalPrice);
         var parts = Set.of("CD", title, artist, String.valueOf(year), String.valueOf(condition), String.valueOf(price));
         var type = item1.getClass().getSimpleName();
 
-        var strings = "CD" + " { name='" + title + "', artist='" + artist + "', year=" + year + ", condition=" + condition + ", original price=" + originalPrice + ", price=" + price + ", price+VAT=" + pricePlusVAT + " }\n";
-        var message = String.format("Klassen Recording: toString saknar information.%nLetade efter %s i strängen:%n%n'%s'%n%nmen något saknades för subtypen %s. Jämförelsen gör skillnad på stora och små bokstäver.%n", strings, item1, type);
+        var strings = "CD" + " { name='" + title + "', artist='" + artist + "', year=" + year + ", condition="
+                + condition + ", original price=" + originalPrice + ", price=" + price + ", price+VAT=" + pricePlusVAT
+                + " }\n";
+        var message = String.format(
+                "Klassen Recording: toString saknar information.%nLetade efter %s i strängen:%n%n'%s'%n%nmen något saknades för subtypen %s. Jämförelsen gör skillnad på stora och små bokstäver.%n",
+                strings, item1, type);
 
         assertTrue(parts.stream().allMatch(s -> item1.toString().contains(s)), message);
     }
@@ -224,14 +240,20 @@ public class Exercise1Test {
     @ParameterizedTest
     @org.junit.jupiter.api.Order(23)
     @DisplayName("Recording: testar att toString innehåller nödvändig information för LP.")
-    @CsvSource({"Phoebe Bridgers, Punisher, 2021, 10, 200.0, 220.0, 275.0", "Bruce Springsteen, The River, 1980, 10, 300.0, 525.0, 656.25"})
-    void recordingCorrectToStringLP(String artist, String title, int year, int condition, double originalPrice, double price, double pricePlusVAT) {
+    @CsvSource({ "Phoebe Bridgers, Punisher, 2021, 10, 200.0, 225.0, 281.25",
+            "Bruce Springsteen, The River, 1980, 10, 300.0, 530.0, 662.5" })
+    void recordingCorrectToStringLP(String artist, String title, int year, int condition, double originalPrice,
+            double price, double pricePlusVAT) {
         var item1 = new LongPlay(title, artist, year, condition, originalPrice);
         var parts = Set.of("LP", title, artist, String.valueOf(year), String.valueOf(condition), String.valueOf(price));
         var type = item1.getClass().getSimpleName();
 
-        var strings = "LP" + " { name='" + title + "', artist='" + artist + "', year=" + year + ", condition=" + condition + ", original price=" + originalPrice + ", price=" + price + ", price+VAT=" + pricePlusVAT + " }\n";
-        var message = String.format("Klassen Recording: toString saknar information.%nLetade efter %s i strängen:%n%n'%s'%n%nmen något saknades för subtypen %s. Jämförelsen gör skillnad på stora och små bokstäver.%n", strings, item1, type);
+        var strings = "LP" + " { name='" + title + "', artist='" + artist + "', year=" + year + ", condition="
+                + condition + ", original price=" + originalPrice + ", price=" + price + ", price+VAT=" + pricePlusVAT
+                + " }\n";
+        var message = String.format(
+                "Klassen Recording: toString saknar information.%nLetade efter %s i strängen:%n%n'%s'%n%nmen något saknades för subtypen %s. Jämförelsen gör skillnad på stora och små bokstäver.%n",
+                strings, item1, type);
 
         assertTrue(parts.stream().allMatch(s -> item1.toString().contains(s)), message);
     }
@@ -240,7 +262,7 @@ public class Exercise1Test {
     @org.junit.jupiter.api.Order(24)
     @DisplayName("Recording: testar att värdet inte hamnar under 10.0.")
     void recordingGetsCorrectMinimumValue() {
-        Recording item = new LongPlay("test", "test", 2025, 1, 90);
+        Recording item = new LongPlay("test", "test", 2026, 1, 90);
         assertEquals(10.0, item.getPrice(), "Fel värde för Longplay med condition 1.");
 
         item = new CompactDisc("test", "test", 2024, 0, 5);
@@ -253,7 +275,8 @@ public class Exercise1Test {
     void recordingHasCorrectFields() {
         var clazz = Recording.class;
         var fields = clazz.getDeclaredFields();
-        var hasCorrectFieldNames = Arrays.stream(fields).map(Field::getName).collect(Collectors.toSet()).containsAll(Set.of("year", "artist", "condition", "price"));
+        var hasCorrectFieldNames = Arrays.stream(fields).map(Field::getName).collect(Collectors.toSet())
+                .containsAll(Set.of("year", "artist", "condition", "price"));
         assertEquals(4, fields.length, "Klassen innehåller inte rätt antal medlemsvariabler.");
         assertTrue(hasCorrectFieldNames, "Klassen innehåller inte rätt medlemsvariabler.");
     }
@@ -285,7 +308,8 @@ public class Exercise1Test {
     @org.junit.jupiter.api.Order(28)
     @DisplayName("Recording: testar att klassen inte kan instansieras.")
     void recordingIsAbstract() {
-        assertTrue(ReflectionUtils.isAbstract(Recording.class), "Klassen Recording ska vara abstrakt och inte kunna instansieras.");
+        assertTrue(ReflectionUtils.isAbstract(Recording.class),
+                "Klassen Recording ska vara abstrakt och inte kunna instansieras.");
     }
 
     @Test
@@ -303,13 +327,15 @@ public class Exercise1Test {
         Item lp3 = new LongPlay("Little Oblivions", "Julien Baker", 2021, 10, 120);
 
         /*
-Receipt for order #1
------------
-Book { name='A guide to modern jazz', author='Unknown author', bound=false, price=100.0, price+VAT=106.0 }
-Book { name='Beethoven: a biography', author='Holmqvist', bound=true, price=520.0, price+VAT=551.2 }
-Total excl. VAT: 620.0
-Total incl. VAT: 657.2
------------
+         * Receipt for order #1
+         * -----------
+         * Book { name='A guide to modern jazz', author='Unknown author', bound=false,
+         * price=100.0, price+VAT=106.0 }
+         * Book { name='Beethoven: a biography', author='Holmqvist', bound=true,
+         * price=520.0, price+VAT=551.2 }
+         * Total excl. VAT: 620.0
+         * Total incl. VAT: 657.2
+         * -----------
          */
         var message = "Metoden getReceipt saknar information.%nLetade efter följande ord %s i strängen:%n%n%s%nmen något saknades.%n";
 
@@ -326,14 +352,17 @@ Total incl. VAT: 657.2
         assertTrue(part.stream().allMatch(receipt::contains), String.format(message, part, receipt));
 
         /*
-Receipt for order #2
------------
-Book { name='Beethoven: a biography', author='Holmqvist', bound=false, price=400.0, price+VAT=424.0 }
-LP { name='Giant Steps', artist='John Coltrane', year=1959, condition=10, original price=100.0, price=425.0, price+VAT=531.25 }
-CD { name='Kind of Blue', artist='Miles Davis', year=1959, condition=5, original price=100.0, price=50.0, price+VAT=62.5 }
-Total excl. VAT: 875.0
-Total incl. VAT: 1017.75
------------
+         * Receipt for order #2
+         * -----------
+         * Book { name='Beethoven: a biography', author='Holmqvist', bound=false,
+         * price=400.0, price+VAT=424.0 }
+         * LP { name='Giant Steps', artist='John Coltrane', year=1959, condition=10,
+         * original price=100.0, price=425.0, price+VAT=531.25 }
+         * CD { name='Kind of Blue', artist='Miles Davis', year=1959, condition=5,
+         * original price=100.0, price=50.0, price+VAT=62.5 }
+         * Total excl. VAT: 875.0
+         * Total incl. VAT: 1017.75
+         * -----------
          */
         order = new Order(book2, item1, cd2);
         receipt = order.getReceipt();
@@ -351,14 +380,17 @@ Total incl. VAT: 1017.75
         assertTrue(part.stream().allMatch(receipt::contains), String.format(message, part, receipt));
 
         /*
-Receipt for order #3
------------
-CD { name='Punisher', artist='Phoebe Bridgers', year=2020, condition=10, original price=200.0, price=200.0, price+VAT=250.0 }
-LP { name='What Kinda Music', artist='Tom Misch', year=2020, condition=10, original price=150.0, price=170.0, price+VAT=212.5 }
-LP { name='Little Oblivions', artist='Julien Baker', year=2021, condition=10, original price=120.0, price=135.0, price+VAT=168.75 }
-Total excl. VAT: 505.0
-Total incl. VAT: 631.25
------------
+         * Receipt for order #3
+         * -----------
+         * CD { name='Punisher', artist='Phoebe Bridgers', year=2020, condition=10,
+         * original price=200.0, price=200.0, price+VAT=250.0 }
+         * LP { name='What Kinda Music', artist='Tom Misch', year=2020, condition=10,
+         * original price=150.0, price=170.0, price+VAT=212.5 }
+         * LP { name='Little Oblivions', artist='Julien Baker', year=2021, condition=10,
+         * original price=120.0, price=135.0, price+VAT=168.75 }
+         * Total excl. VAT: 505.0
+         * Total incl. VAT: 631.25
+         * -----------
          */
         order = new Order(lp1, lp2, lp3);
         receipt = order.getReceipt();
