@@ -39,8 +39,8 @@ public class Order {
         String kvittoDel2 = "";
         for (Item item : items) {
             if (item instanceof Book) {
-                String[] parsad = ((Book) item).toString().split(",");
-                kvittoDel2 += "Book { name='" + parsad[0] + "', author='" + parsad[1] + "', bound=" + parsad[2] + ",\nprice=" + parsad[3] + ", price+VAT=" + item.getPriceWithVAT() + " }\n";
+                String[] parsad = ((Book) item).toString().split(", ");
+                kvittoDel2 += "Book { name='" + parsad[0] + "', author='" + parsad[1] + "', bound=" + parsad[3] + ",\nprice=" + parsad[2] + ", price+VAT=" + item.getPriceWithVAT() + " }\n";
                 //kvittoDel2 += "Book { name='" + ((Book) item).toString();
             } else if (item instanceof CompactDisc) {
                 CompactDisc CD = (CompactDisc) item;
