@@ -1,9 +1,10 @@
 package se.su.ovning2;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
+
+//import java.util.HashSet;
 
 public class Recording {
   private final int year;
@@ -11,6 +12,16 @@ public class Recording {
   private final String title;
   private final String type;
   private final Set<String> genre;
+
+/*public static void main(String[] args) {
+  Set<String> dylanGenres = new HashSet<>();
+    dylanGenres.add("Rock");
+    dylanGenres.add("Folk");
+    dylanGenres.add("World");
+    dylanGenres.add("Country");
+  Recording r1 = new Recording("Bringing It All Back Home", "Bob Dylan", 1, "CD", dylanGenres);
+  System.out.println(r1.hashCode());
+}*/
 
   public Recording(String title, String artist, int year, String type, Set<String> genre) {
     this.title = title;
@@ -40,35 +51,16 @@ public class Recording {
     return year;
   }
 
-  /*public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Recording)) return false;
-    Recording that = (Recording) o;
-    return year == that.year &&
-    Objects.equals(title, that.title) &&
-    Objects.equals(artist, that.artist);
-  }*/
-  
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o instanceof Recording) {
       Recording rec = (Recording) o;
       return this.getYear() == rec.getYear() && 
       this.getTitle().equals(rec.getTitle()) && 
-      this.getArtist().equals(rec.getArtist());
+      this.getArtist().equals(rec.getArtist()); //om this.getYear().... till rec.getArtist()) allt stämmer, returnera true!
     }
     return false;
   }
-  
-public static void main(String[] args) {
-  Set<String> dylanGenres = new HashSet<>();
-    dylanGenres.add("Rock");
-    dylanGenres.add("Folk");
-    dylanGenres.add("World");
-    dylanGenres.add("Country");
-  Recording r1 = new Recording("Bringing It All Back Home", "Bob Dylan", 1, "CD", dylanGenres);
-  System.out.println(r1.hashCode());
-}
 
   public int hashCode() {
     return Objects.hash(title, artist, year);
