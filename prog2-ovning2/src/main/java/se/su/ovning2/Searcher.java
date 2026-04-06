@@ -107,13 +107,7 @@ public class Searcher implements SearchOperations {
     return Collections.unmodifiableSet(recordingsAfter);
   }
 
-    @Override
-  public SortedSet<Recording> getRecordingsByArtistOrderedByYearAsc(String artist) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-        "Unimplemented method 'getRecordingsByArtistOrderedByYearAsc'");
-  }
-  /*@Override
+  @Override
   public SortedSet<Recording> getRecordingsByArtistOrderedByYearAsc(String artist) {
     Map<Integer, Set<Recording>> artistRecordings = artistsMap.get(artist);
     SortedSet<Recording> recordingsAfterYear = new TreeSet<>();
@@ -121,7 +115,7 @@ public class Searcher implements SearchOperations {
       recordingsAfterYear.addAll(recordingSet);
     }
     return recordingsAfterYear;
-  }*/
+  }
 
   public class RecordingComparator implements Comparator<Recording> {
     public int compare(Recording r1, Recording r2) {
