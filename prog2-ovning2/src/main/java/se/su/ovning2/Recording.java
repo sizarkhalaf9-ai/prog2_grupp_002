@@ -2,6 +2,7 @@ package se.su.ovning2;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.Objects;
 
 public class Recording {
   private final int year;
@@ -38,22 +39,23 @@ public class Recording {
     return year;
   }
 
-  /*
-   * public boolean equals(Object o) {
-   * if (this == o) return true;
-   * if (!(o instanceof Recording)) return false;
-   * Recording that = (Recording) o;
-   * return year == that.year &&
-   * Objects.equals(title, that.title) &&
-   * Objects.equals(artist, that.artist);
-   * }
-   *
-   *
-   * public int hashCode() {
-   * return Objects.hash(title, artist, year);
-   * }
-   */
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o instanceof Recording) {
+      Recording r = (Recording) o;
+      return this.getTitle().equals(r.getTitle()) && this.getArtist().equals(r.getArtist())
+          && this.getYear() == r.getYear();
 
+    }
+    return false;
+
+  }
+
+  public int hashCode() {
+    return Objects.hash(title, artist, year);
+  }
 
   @Override
   public String toString() {
