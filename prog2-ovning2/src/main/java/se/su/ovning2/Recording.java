@@ -1,7 +1,9 @@
 package se.su.ovning2;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.Objects;
 
 public class Recording {
   private final int year;
@@ -38,22 +40,39 @@ public class Recording {
     return year;
   }
 
-  /*
-   * public boolean equals(Object o) {
-   * if (this == o) return true;
-   * if (!(o instanceof Recording)) return false;
-   * Recording that = (Recording) o;
-   * return year == that.year &&
-   * Objects.equals(title, that.title) &&
-   * Objects.equals(artist, that.artist);
-   * }
-   *
-   *
-   * public int hashCode() {
-   * return Objects.hash(title, artist, year);
-   * }
-   */
+  /*public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Recording)) return false;
+    Recording that = (Recording) o;
+    return year == that.year &&
+    Objects.equals(title, that.title) &&
+    Objects.equals(artist, that.artist);
+  }*/
+  
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o instanceof Recording) {
+      Recording rec = (Recording) o;
+      return this.getYear() == rec.getYear() && 
+      this.getTitle().equals(rec.getTitle()) && 
+      this.getArtist().equals(rec.getArtist());
+    }
+    return false;
+  }
+  
+public static void main(String[] args) {
+  Set<String> dylanGenres = new HashSet<>();
+    dylanGenres.add("Rock");
+    dylanGenres.add("Folk");
+    dylanGenres.add("World");
+    dylanGenres.add("Country");
+  Recording r1 = new Recording("Bringing It All Back Home", "Bob Dylan", 1, "CD", dylanGenres);
+  System.out.println(r1.hashCode());
+}
 
+  public int hashCode() {
+    return Objects.hash(title, artist, year);
+  }
 
   @Override
   public String toString() {
