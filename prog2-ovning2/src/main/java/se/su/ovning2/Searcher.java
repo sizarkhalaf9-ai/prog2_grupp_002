@@ -1,7 +1,10 @@
 package se.su.ovning2;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.Set;
 
@@ -10,14 +13,23 @@ public class Searcher implements SearchOperations {
   private Set<String> numberOfArtists = new HashSet<>();
   private Set<String> genres = new HashSet<>();
   private Set<String> title = new HashSet<>();
+  private Map<String, Recording> recordingsByTitle = new HashMap<>();
+  private Map<String, Set<Recording>> recordingsByArtist = new HashMap<>();
 
   public Searcher(Collection<Recording> data) {
 
     recordings = data;
+
     for (Recording r : data) {
       numberOfArtists.add(r.getArtist());
       genres.addAll(r.getGenre());
       title.add(r.getTitle());
+
+      recordingsByTitle.put(r.getTitle(), r);
+
+      recordingsByArtist
+          .computeIfAbsent(r.getArtist(), k -> new HashSet<>())
+          .add(r);
     }
   }
 
@@ -38,20 +50,18 @@ public class Searcher implements SearchOperations {
 
   @Override
   public boolean doesArtistExist(String name) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'doesArtistExist'");
+    return numberOfArtists.contains(name);
   }
 
   @Override
   public Collection<String> getGenres() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getGenres'");
+    return Collections.unmodifiableSet(genres);
   }
 
   @Override
   public Recording getRecordingByName(String title) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getRecordingByName'");
+    return recordingsByTitle.get(title);
+
   }
 
   @Override
