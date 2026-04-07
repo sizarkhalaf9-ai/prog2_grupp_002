@@ -8,12 +8,16 @@ import java.util.Set;
 public class Searcher implements SearchOperations {
   private Collection<Recording> recordings;
   private Set<String> numberOfArtists = new HashSet<>();
+  private Set<String> genres = new HashSet<>();
+  private Set<String> title = new HashSet<>();
 
   public Searcher(Collection<Recording> data) {
 
     recordings = data;
     for (Recording r : data) {
       numberOfArtists.add(r.getArtist());
+      genres.addAll(r.getGenre());
+      title.add(r.getTitle());
     }
   }
 
@@ -24,14 +28,12 @@ public class Searcher implements SearchOperations {
 
   @Override
   public long numberOfGenres() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'numberOfGenres'");
+    return genres.size();
   }
 
   @Override
   public long numberOfTitles() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'numberOfTitles'");
+    return title.size();
   }
 
   @Override
