@@ -1,6 +1,19 @@
 package se.su.ovning2;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.TreeMap;
+
+import java.util.SortedSet;
+import java.util.SortedMap;
+import java.util.Comparator;
 
 public class Searcher implements SearchOperations {
 
