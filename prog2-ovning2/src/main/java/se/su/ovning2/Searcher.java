@@ -4,19 +4,13 @@ import java.util.*;
 
 public class Searcher implements SearchOperations {
 
-  private Collection<Recording> recordings;
   private Map<String, TreeMap<Integer, Set<Recording>>> artistsMap = new HashMap<>();
-  private Map<String, Set<Recording>> genresMap = new HashMap<>();
-  private Map<String, TreeMap<Integer, Set<Recording>>> genresByYearMap = new HashMap<>();
+  private Map<String, TreeMap<Integer, Set<Recording>>> genresMap = new HashMap<>();
   private Map<String, Recording> titlesMap = new HashMap<>();
   private TreeMap<Integer, Set<Recording>> yearsMap = new TreeMap<>();
   private Set<Recording> recordingsSet = new HashSet<>();
 
-  //private Collection<Recording> emptySet = new HashSet<>();
-
   public Searcher(Collection<Recording> data) {
-    this.recordings = data;
-
     recordingsSet.addAll(data);
 
     for (Recording d : data) {
@@ -40,14 +34,10 @@ public class Searcher implements SearchOperations {
       
       for (String g : genres) {
         if (!genresMap.containsKey(g))
-          genresMap.put(g, new HashSet<>());
-        genresMap.get(g).add(d);
-
-        if (!genresByYearMap.containsKey(g))
-          genresByYearMap.put(g, new TreeMap<>());
-        if (!genresByYearMap.get(g).containsKey(year))
-          genresByYearMap.get(g).put(year, new HashSet<>());
-        genresByYearMap.get(g).get(year).add(d);
+          genresMap.put(g, new TreeMap<>());
+        if (!genresMap.get(g).containsKey(year))
+          genresMap.get(g).put(year, new HashSet<>());
+        genresMap.get(g).get(year).add(d);
       }
   }
 }
@@ -76,14 +66,6 @@ public class Searcher implements SearchOperations {
     return artistsMap.keySet().contains(name);
   }
 
-  public static void main(String[] args) {
-    Data data = new Data();
-
-    for (Recording r : data.getRecordings()) {
-      System.out.println(r.getGenre() + ", ");
-    }  
-  }
-
   @Override
   public Collection<String> getGenres() {
 
@@ -96,13 +78,13 @@ public class Searcher implements SearchOperations {
     return titlesMap.get(title);
   }
 
-  @Override //Är detta verkligen after och inte from?
+  @Override
   public Collection<Recording> getRecordingsAfter(int year) {
     SortedMap<Integer, Set<Recording>> recordingsMap = yearsMap.tailMap(year);
     Collection<Set<Recording>> recordingsSet = recordingsMap.values();
     Set<Recording> recordingsAfter = new HashSet<>();
-    for (Set<Recording> rSet : recordingsSet) {
-      recordingsAfter.addAll(rSet);
+    for (Set<Recording> recordingSet : recordingsSet) {
+      recordingsAfter.addAll(recordingSet);
     }
     return Collections.unmodifiableSet(recordingsAfter);
   }
@@ -110,15 +92,16 @@ public class Searcher implements SearchOperations {
   @Override
   public SortedSet<Recording> getRecordingsByArtistOrderedByYearAsc(String artist) {
     Map<Integer, Set<Recording>> artistRecordings = artistsMap.get(artist);
-    SortedSet<Recording> recordingsAfterYear = new TreeSet<>();
-    for (Set<Recording> recordingSet : artistRecordings.values()) {
+    SortedSet<Recording> recordingsAfterYear = new TreeSet<>(new YearComparator());
+    for (Set<Recording> recordingSet : artistRecordings.values()) 
       recordingsAfterYear.addAll(recordingSet);
-    }
-    return recordingsAfterYear;
+    
+    return Collections.unmodifiableSortedSet(recordingsAfterYear);
   }
 
-  public class RecordingComparator implements Comparator<Recording> {
+  private class YearComparator implements Comparator<Recording> {
     public int compare(Recording r1, Recording r2) {
+
       return r1.getYear() - r2.getYear();
     }
   }
@@ -128,26 +111,60 @@ public class Searcher implements SearchOperations {
     if (!genresMap.keySet().contains(genre))
       return Collections.emptySet();
 
-    return Collections.unmodifiableSet(genresMap.get(genre));
+    Set<Recording> recordingsByGenre = new HashSet<>();
+    for (Set<Recording> recordingsSet : genresMap.get(genre).values()) 
+      recordingsByGenre.addAll(recordingsSet);
+    
+    return Collections.unmodifiableSet(recordingsByGenre);
   }
 
   @Override
   public Collection<Recording> getRecordingsByGenreAndYear(String genre, int yearFrom, int yearTo) {
-    SortedMap<Integer, Set<Recording>> recordingsOfGenre = genresByYearMap.get(genre).subMap(yearFrom, yearTo + 1);
+    SortedMap<Integer, Set<Recording>> recordingsOfGenre = genresMap.get(genre).subMap(yearFrom, yearTo + 1);
     Set<Recording> recordingsByGenreAndYear = new HashSet<>();
-    for (Set<Recording> recordingSet : recordingsOfGenre.values()) {
+    for (Set<Recording> recordingSet : recordingsOfGenre.values()) 
       recordingsByGenreAndYear.addAll(recordingSet);
-    }
+    
     return Collections.unmodifiableSet(recordingsByGenreAndYear);
   }
 
   @Override
   public Collection<Recording> offerHasNewRecordings(Collection<Recording> offered) {
     Set<Recording> keepers = new HashSet<>();
-    for (Recording o : offered) {
+    for (Recording o : offered) 
       if (!recordingsSet.contains(o))
         keepers.add(o);
-    }
+    
     return Collections.unmodifiableSet(keepers);
+  }
+
+  public Collection<Recording> optionalGetRecordingsBefore(int year) {
+    Set<Recording> recordingsBeforeYear = new HashSet<>();
+    for (Set<Recording> recording : yearsMap.headMap(year).values()) 
+      recordingsBeforeYear.addAll(recording);
+
+    return Collections.unmodifiableSet(recordingsBeforeYear);
+  }
+
+  public SortedSet<Recording> optionalGetRecordingsByArtistOrderedByTitleAsc(String artist) {
+    SortedSet<Recording> artistRecordings = new TreeSet<>(new TitleComparator());
+    for (Set<Recording> recordingsSet : artistsMap.get(artist).values()) 
+      artistRecordings.addAll(recordingsSet);
+    
+    return Collections.unmodifiableSortedSet(artistRecordings);
+  }
+
+  private class TitleComparator implements Comparator<Recording> {
+    public int compare(Recording r1, Recording r2) {
+
+      return r1.getTitle().compareTo(r2.getTitle());
+    }
+  }
+
+  public Collection<Recording> optionalGetRecordingsFrom(int year) {
+    if(!yearsMap.containsKey(year))
+      return Collections.emptySet();
+
+    return Collections.unmodifiableSet(yearsMap.get(year));
   }
 }
