@@ -12,7 +12,7 @@ public class Searcher implements SearchOperations {
   private TreeMap<Integer, Set<Recording>> yearsMap = new TreeMap<>();
   private Set<Recording> recordingsSet = new HashSet<>();
 
-  //private Collection<Recording> emptySet = new HashSet<>();
+  // private Collection<Recording> emptySet = new HashSet<>();
 
   public Searcher(Collection<Recording> data) {
     this.recordings = data;
@@ -25,11 +25,11 @@ public class Searcher implements SearchOperations {
       int year = d.getYear();
       Collection<String> genres = d.getGenre();
 
-      if (!titlesMap.containsKey(title)) 
-          titlesMap.put(title, d);
-      
+      if (!titlesMap.containsKey(title))
+        titlesMap.put(title, d);
+
       if (!artistsMap.containsKey(artist))
-        artistsMap.put(artist, new TreeMap<>()); 
+        artistsMap.put(artist, new TreeMap<>());
       if (!artistsMap.get(artist).containsKey(year))
         artistsMap.get(artist).put(year, new HashSet<>());
       artistsMap.get(artist).get(year).add(d);
@@ -37,7 +37,7 @@ public class Searcher implements SearchOperations {
       if (!yearsMap.containsKey(year))
         yearsMap.put(year, new HashSet<>());
       yearsMap.get(year).add(d);
-      
+
       for (String g : genres) {
         if (!genresMap.containsKey(g))
           genresMap.put(g, new HashSet<>());
@@ -49,8 +49,8 @@ public class Searcher implements SearchOperations {
           genresByYearMap.get(g).put(year, new HashSet<>());
         genresByYearMap.get(g).get(year).add(d);
       }
+    }
   }
-}
 
   @Override
   public long numberOfArtists() {
@@ -81,7 +81,7 @@ public class Searcher implements SearchOperations {
 
     for (Recording r : data.getRecordings()) {
       System.out.println(r.getGenre() + ", ");
-    }  
+    }
   }
 
   @Override
@@ -92,11 +92,11 @@ public class Searcher implements SearchOperations {
 
   @Override
   public Recording getRecordingByName(String title) {
-    
+
     return titlesMap.get(title);
   }
 
-  @Override //Är detta verkligen after och inte from?
+  @Override // Är detta verkligen after och inte from?
   public Collection<Recording> getRecordingsAfter(int year) {
     SortedMap<Integer, Set<Recording>> recordingsMap = yearsMap.tailMap(year);
     Collection<Set<Recording>> recordingsSet = recordingsMap.values();
@@ -110,11 +110,11 @@ public class Searcher implements SearchOperations {
   @Override
   public SortedSet<Recording> getRecordingsByArtistOrderedByYearAsc(String artist) {
     Map<Integer, Set<Recording>> artistRecordings = artistsMap.get(artist);
-    SortedSet<Recording> recordingsAfterYear = new TreeSet<>();
+    SortedSet<Recording> recordingsAfterYear = new TreeSet<>(new RecordingComparator());
     for (Set<Recording> recordingSet : artistRecordings.values()) {
       recordingsAfterYear.addAll(recordingSet);
     }
-    return recordingsAfterYear;
+    return Collections.unmodifiableSortedSet(recordingsAfterYear);
   }
 
   public class RecordingComparator implements Comparator<Recording> {
