@@ -10,8 +10,6 @@ public class Searcher implements SearchOperations {
   private TreeMap<Integer, Set<Recording>> yearsMap = new TreeMap<>();
   private Set<Recording> recordingsSet = new HashSet<>();
 
-  // private Collection<Recording> emptySet = new HashSet<>();
-
   public Searcher(Collection<Recording> data) {
     recordingsSet.addAll(data);
 
@@ -21,11 +19,11 @@ public class Searcher implements SearchOperations {
       int year = d.getYear();
       Collection<String> genres = d.getGenre();
 
-      if (!titlesMap.containsKey(title))
-        titlesMap.put(title, d);
-
+      if (!titlesMap.containsKey(title)) 
+          titlesMap.put(title, d);
+      
       if (!artistsMap.containsKey(artist))
-        artistsMap.put(artist, new TreeMap<>());
+        artistsMap.put(artist, new TreeMap<>()); 
       if (!artistsMap.get(artist).containsKey(year))
         artistsMap.get(artist).put(year, new HashSet<>());
       artistsMap.get(artist).get(year).add(d);
@@ -33,7 +31,7 @@ public class Searcher implements SearchOperations {
       if (!yearsMap.containsKey(year))
         yearsMap.put(year, new HashSet<>());
       yearsMap.get(year).add(d);
-
+      
       for (String g : genres) {
         if (!genresMap.containsKey(g))
           genresMap.put(g, new TreeMap<>());
@@ -41,8 +39,8 @@ public class Searcher implements SearchOperations {
           genresMap.get(g).put(year, new HashSet<>());
         genresMap.get(g).get(year).add(d);
       }
-    }
   }
+}
 
   @Override
   public long numberOfArtists() {
@@ -68,14 +66,6 @@ public class Searcher implements SearchOperations {
     return artistsMap.keySet().contains(name);
   }
 
-  public static void main(String[] args) {
-    Data data = new Data();
-
-    for (Recording r : data.getRecordings()) {
-      System.out.println(r.getGenre() + ", ");
-    }
-  }
-
   @Override
   public Collection<String> getGenres() {
 
@@ -84,11 +74,10 @@ public class Searcher implements SearchOperations {
 
   @Override
   public Recording getRecordingByName(String title) {
-
+    
     return titlesMap.get(title);
   }
 
-  @Override // Är detta verkligen after och inte from?
   @Override
   public Collection<Recording> getRecordingsAfter(int year) {
     SortedMap<Integer, Set<Recording>> recordingsMap = yearsMap.tailMap(year);
