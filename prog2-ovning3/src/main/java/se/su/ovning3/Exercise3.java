@@ -35,7 +35,7 @@ public class Exercise3 {
 			sb.append(" " + "<artist>John Coltrane</artist>");
 			//Stringbuilder inte klar
 			for (int i = 0; i < recordings.size(); i++) {
-				sb.append("<recording>")
+				sb.append("<recording>");
 				sb.append(" " + "<artist>" + recordings.get(i).getArtist() + "</artist>");
 				sb.append(" " + "<title>" + recordings.get(i).getTitle() + "</title>");
 				sb.append(" " + "<year>" + recordings.get(i).getYear()+ "</year>");
