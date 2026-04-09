@@ -33,18 +33,17 @@ public class Exercise3 {
 			StringBuilder sb = new StringBuilder("<recording>");
 			System.out.println(sb);
 			sb.append(" " + "<artist>John Coltrane</artist>");
-			//Stringbuilder inte klar
+
 			for (int i = 0; i < recordings.size(); i++) {
 				sb.append("<recording>");
 				sb.append(" " + "<artist>" + recordings.get(i).getArtist() + "</artist>");
 				sb.append(" " + "<title>" + recordings.get(i).getTitle() + "</title>");
-				sb.append(" " + "<year>" + recordings.get(i).getYear()+ "</year>");
+				sb.append(" " + "<year>" + recordings.get(i).getYear() + "</year>");
 
-				for(int r= 0; r < recordings.get(i).getGenre().size(); r++){
+				for (int r = 0; r < recordings.get(i).getGenre().size(); r++) {
 					// Inte klar med forloopen
 
-				}	
-
+				}
 
 			}
 
