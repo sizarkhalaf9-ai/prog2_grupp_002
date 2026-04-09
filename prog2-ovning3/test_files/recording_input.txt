@@ -1,0 +1,25 @@
+6
+John Coltrane;A Love Supreme;1965
+1
+Jazz
+The Cure;Boys Don't Cry;1979
+3
+Post-Punk
+Rock
+New Wave
+John Coltrane;Giant Steps;1959
+1
+Jazz
+Phoebe Bridgers;Punisher;2021
+1
+Jazz
+The White Stripes;White Blood Cells;2001
+5
+Indie Rock
+Blues Rock
+Alternative Rock
+Garage Rock
+Rock
+Tom Misch & Yussef Dayes;What Kinda Music;2021
+1
+Soul
