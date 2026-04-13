@@ -41,15 +41,20 @@ class Exercise3Test {
     private static final String TITLE_PUNISHER = "Punisher";
     private static final String TITLE_SKETCHES_OF_SPAIN = "Sketches of Spain";
     private static final String TITLE_WHAT_KINDA_MUSIC = "What Kinda Music";
-    private static final Recording PUNISHER = new Recording(TITLE_PUNISHER, ARTIST_PHOEBE_BRIDGERS, 2021, Set.of(GENRE_JAZZ));
-    private static final Recording WKM = new Recording(TITLE_WHAT_KINDA_MUSIC, ARTIST_TOM_MISCH_YUSSEF_DAYES, 2021, Set.of(GENRE_SOUL));
-    private static final Recording GS = new Recording(TITLE_GIANT_STEPS, ARTIST_JOHN_COLTRANE, 1959, Set.of(GENRE_JAZZ));
-    private static final Recording LS = new Recording(TITLE_A_LOVE_SUPREME, ARTIST_JOHN_COLTRANE, 1965, Set.of(GENRE_JAZZ));
-    private static final Recording BDC = new Recording(TITLE_BOYS_DON_T_CRY, ARTIST_THE_CURE, 1979, Set.of(GENRE_ROCK, GENRE_NEW_WAVE, GENRE_POST_PUNK));
-    private static final Recording WBC = new Recording(TITLE_WHITE_BLOOD_CELLS, ARTIST_THE_WHITE_STRIPES, 2001, Set.of(GENRE_ROCK, GENRE_INDIE_ROCK, GENRE_ALTERNATIVE_ROCK, GENRE_BLUES_ROCK, GENRE_GARAGE_ROCK));
+    private static final Recording PUNISHER = new Recording(TITLE_PUNISHER, ARTIST_PHOEBE_BRIDGERS, 2021,
+            Set.of(GENRE_JAZZ));
+    private static final Recording WKM = new Recording(TITLE_WHAT_KINDA_MUSIC, ARTIST_TOM_MISCH_YUSSEF_DAYES, 2021,
+            Set.of(GENRE_SOUL));
+    private static final Recording GS = new Recording(TITLE_GIANT_STEPS, ARTIST_JOHN_COLTRANE, 1959,
+            Set.of(GENRE_JAZZ));
+    private static final Recording LS = new Recording(TITLE_A_LOVE_SUPREME, ARTIST_JOHN_COLTRANE, 1965,
+            Set.of(GENRE_JAZZ));
+    private static final Recording BDC = new Recording(TITLE_BOYS_DON_T_CRY, ARTIST_THE_CURE, 1979,
+            Set.of(GENRE_ROCK, GENRE_NEW_WAVE, GENRE_POST_PUNK));
+    private static final Recording WBC = new Recording(TITLE_WHITE_BLOOD_CELLS, ARTIST_THE_WHITE_STRIPES, 2001,
+            Set.of(GENRE_ROCK, GENRE_INDIE_ROCK, GENRE_ALTERNATIVE_ROCK, GENRE_BLUES_ROCK, GENRE_GARAGE_ROCK));
     public static final List<Recording> DEFAULT_RECORDINGS = List.of(
-            LS, BDC, GS, PUNISHER, WBC, WKM
-    );
+            LS, BDC, GS, PUNISHER, WBC, WKM);
     private static final String RECORD_IMPORT_FILE = "recording_import.text";
     private static final String RECORD_EXPORT_FILE = "recording_export.text";
     private static final String BINARY_SALES_FILE = "sales_import.bin";
@@ -83,12 +88,7 @@ class Exercise3Test {
     void binarySalesDataImportFixed() {
 
         Map<Integer, Double> data = Map.of(
-                202301, 20.0
-                , 202302, 12.4
-                , 202303, 40.0
-                , 202304, 33.2
-                , 202305, 70.0
-        );
+                202301, 20.0, 202302, 12.4, 202303, 40.0, 202304, 33.2, 202305, 70.0);
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(BINARY_SALES_FILE))) {
 
             out.writeInt(10);
@@ -232,10 +232,10 @@ class Exercise3Test {
 
         try {
 
-            var expected = Arrays.asList(sb.toString().split("\n"));
-
+            var expected = new ArrayList<>( Arrays.asList(sb.toString().split("\n")));
+            System.out.println(expected);
             var actual = Files.readString(Path.of(RECORD_EXPORT_FILE));
-
+            System.out.println(actual);
             var ok = expected
                     .stream()
                     .allMatch(actual::contains);
@@ -280,7 +280,8 @@ class Exercise3Test {
         var randomRecordings = new ArrayList<Recording>();
 
         for (int i = 0; i < 1000; i++) {
-            randomRecordings.add(new Recording("title" + i, "artist" + random.nextInt(50), 2021, Set.of("genre1", "genre2")));
+            randomRecordings
+                    .add(new Recording("title" + i, "artist" + random.nextInt(50), 2021, Set.of("genre1", "genre2")));
         }
 
         recordings.clear();
@@ -293,7 +294,6 @@ class Exercise3Test {
         exercise3.exportRecordings(RECORD_EXPORT_FILE);
     }
 
-
     @BeforeEach
     void setUp() {
         exercise3 = new Exercise3();
@@ -303,6 +303,7 @@ class Exercise3Test {
         exercise3.setRecordings(Collections.emptyList());
         assertEquals(0, exercise3.getRecordings().size(), "Före import: listan är inte tom.");
         exercise3.importRecordings(RECORD_IMPORT_FILE);
-        assertEquals(recordings.size(), exercise3.getRecordings().size(), "Efter import: listan innehåller inte rätt antal objekt.");
+        assertEquals(recordings.size(), exercise3.getRecordings().size(),
+                "Efter import: listan innehåller inte rätt antal objekt.");
     }
 }

@@ -20,6 +20,7 @@ public class Exercise3 {
 	public static void main(String[] args) {
 		Exercise3 exercise3 = new Exercise3();
 		exercise3.importRecordings("recording_input.txt");
+		exercise3.exportRecordings("recording_output.txt");
 
 	}
 
@@ -30,22 +31,23 @@ public class Exercise3 {
 			PrintWriter printWriter = new PrintWriter(fileWriter);
 			// printWriter.println(recording);
 			// printWriter.println(new ArrayList<String>());
-			StringBuilder sb = new StringBuilder("<recording>");
-			System.out.println(sb);
-			sb.append(" " + "<artist>John Coltrane</artist>");
+			StringBuilder sb = new StringBuilder();
+			// System.out.println(sb);
+			// sb.append(" " + "<artist>John Coltrane</artist>");
 
 			for (int i = 0; i < recordings.size(); i++) {
-				sb.append("<recording>");
-				sb.append(" " + "<artist>" + recordings.get(i).getArtist() + "</artist>");
-				sb.append(" " + "<title>" + recordings.get(i).getTitle() + "</title>");
-				sb.append(" " + "<year>" + recordings.get(i).getYear() + "</year>");
+				sb.append("<recording>\n");
+				sb.append("<artist>" + recordings.get(i).getArtist() + "</artist>\n");
+				sb.append("<title>" + recordings.get(i).getTitle() + "</title>\n");
+				sb.append("<year>" + recordings.get(i).getYear() + "</year>\n");
+				sb.append("<genres>\n");
 
-				for (int r = 0; r < recordings.get(i).getGenre().size(); r++) {
-					// Inte klar med forloopen
-
+				for (String g : recordings.get(i).getGenre()) {
+					sb.append("<genre>" + g + "</genre>\n");
 				}
-
+				sb.append("</genres>\n</recording>\n");
 			}
+			printWriter.print(sb);
 
 			printWriter.close();
 			fileWriter.close();
@@ -77,7 +79,7 @@ public class Exercise3 {
 					genres.add(line);
 				}
 
-				Recording recording = new Recording(parsad[0], parsad[1], Integer.parseInt(parsad[2]), genres);
+				Recording recording = new Recording(parsad[1], parsad[0], Integer.parseInt(parsad[2]), genres);
 				recordings.add(recording);
 			}
 			fileReader.close();
