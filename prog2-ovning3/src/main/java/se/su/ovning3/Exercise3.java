@@ -1,6 +1,8 @@
 package se.su.ovning3;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +84,28 @@ public class Exercise3 {
 	}
 
 	public Map<Integer, Double> importSales(String fileName) {
-		return null;
+		try {
+			DataInputStream dis = new DataInputStream(new FileInputStream(fileName));
+			Map<Integer, Double> salesData = new HashMap<>();
+			int numberOfPosts = dis.readInt();
+			for (int i = 0; i < numberOfPosts; i++) {
+				int key = dis.readInt() * 100 + dis.readInt();
+				dis.readInt();
+				double value = dis.readDouble();
+				if (salesData.containsKey(key))
+					value += salesData.get(key);
+				salesData.put(key, value);
+			}
+			dis.close();
+			return salesData;
+
+		} catch (FileNotFoundException e) {
+			System.out.printf("Filen %s kunde inte hittas, vänligen försök igen.", fileName);
+		} catch (IOException e) {
+			System.out.print("IOException. Stack trace: ");
+			e.printStackTrace();
+		}
+		return Collections.emptyMap();
 	}
 
 	public List<Recording> getRecordings() {
