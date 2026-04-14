@@ -27,37 +27,23 @@ public class Exercise3 {
 	public void exportRecordings(String fileName) {
 
 		try {
-			FileWriter fileWriter = new FileWriter(fileName);
-			PrintWriter printWriter = new PrintWriter(fileWriter);
-			// printWriter.println(recording);
-			// printWriter.println(new ArrayList<String>());
+			PrintWriter writer = new PrintWriter(new FileWriter(fileName));
 			StringBuilder sb = new StringBuilder();
-			// System.out.println(sb);
-			// sb.append(" " + "<artist>John Coltrane</artist>");
-
-			for (int i = 0; i < recordings.size(); i++) {
-				sb.append("<recording>\n");
-				sb.append("<artist>" + recordings.get(i).getArtist() + "</artist>\n");
-				sb.append("<title>" + recordings.get(i).getTitle() + "</title>\n");
-				sb.append("<year>" + recordings.get(i).getYear() + "</year>\n");
-				sb.append("<genres>\n");
-
-				for (String g : recordings.get(i).getGenre()) {
-					sb.append("<genre>" + g + "</genre>\n");
+			for (Recording r : recordings) {
+				sb.append(String.format("<recording>%n  <artist>%s</artist>%n", r.getArtist()));
+				sb.append(String.format("  <title>%s</title>%n", r.getTitle()));
+				sb.append(String.format("  <year>%d</year>%n  <genres>%n", r.getYear()));
+				for (String g : r.getGenre()) {
+					sb.append(String.format("    <genre>%s</genre>%n", g));
 				}
-				sb.append("</genres>\n</recording>\n");
+				sb.append(String.format("  </genres>%n</recording>%n"));
 			}
-			printWriter.print(sb);
-
-			printWriter.close();
-			fileWriter.close();
-		} catch (FileNotFoundException e) {
-			System.out.printf("%s not found%n", fileName);
-
+			writer.print(sb);
+			writer.close();
 		} catch (IOException e) {
+			System.out.print("Stack trace: ");
 			e.printStackTrace();
 		}
-
 	}
 
 	public void importRecordings(String fileName) {
