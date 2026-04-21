@@ -37,11 +37,18 @@
   <title>White Blood Cells</title>
   <year>2001</year>
   <genres>
+<<<<<<< Updated upstream
     <genre>Alternative Rock</genre>
+=======
+>>>>>>> Stashed changes
     <genre>Blues Rock</genre>
     <genre>Indie Rock</genre>
     <genre>Rock</genre>
     <genre>Garage Rock</genre>
+<<<<<<< Updated upstream
+=======
+    <genre>Alternative Rock</genre>
+>>>>>>> Stashed changes
   </genres>
 </recording>
 <recording>

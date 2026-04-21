@@ -24,12 +24,50 @@ public class Exercise3 {
 		Exercise3 exercise3 = new Exercise3();
 		exercise3.importRecordings("recording_input.txt");
 		exercise3.exportRecordings("recording_output.txt");
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 	}
 
+	// public void importRecordings(String fileName) {
+	// 	try {
+	// 		FileReader fileReader = new FileReader(fileName);
+	// 		BufferedReader reader = new BufferedReader(fileReader);
+	// 		String line;
+	// 		line = reader.readLine();
+	// 		while ((line = reader.readLine()) != null) {
+
+	// 			String[] parsad = line.split(";");
+
+	// 			line = reader.readLine();
+	// 			int numberOfgenres = Integer.parseInt(line);
+
+	// 			Set<String> genres = new HashSet<>();
+	// 			for (int i = 0; i < numberOfgenres; i++) {
+	// 				line = reader.readLine();
+	// 				genres.add(line);
+	// 			}
+
+	// 			Recording recording = new Recording(parsad[0], parsad[1], Integer.parseInt(parsad[2]), genres);
+	// 			recordings.add(recording);
+	// 		}
+	// 		fileReader.close();
+	// 		reader.close();
+	// 	} catch (FileNotFoundException e) {
+	// 		System.out.printf("%s not found%n", fileName);
+	// 	} catch (IOException e) {
+	// 		e.printStackTrace();
+	// 	}
+	// }
+
 	public void exportRecordings(String fileName) {
+<<<<<<< Updated upstream
 
 		try {
+=======
+		try { 
+>>>>>>> Stashed changes
 			PrintWriter writer = new PrintWriter(new FileWriter(fileName));
 			StringBuilder sb = new StringBuilder();
 			for (Recording r : recordings) {
@@ -38,8 +76,12 @@ public class Exercise3 {
 				sb.append(String.format("  <year>%d</year>%n  <genres>%n", r.getYear()));
 				for (String g : r.getGenre()) {
 					sb.append(String.format("    <genre>%s</genre>%n", g));
+<<<<<<< Updated upstream
 				}
 				sb.append(String.format("  </genres>%n</recording>%n"));
+=======
+				} sb.append(String.format("  </genres>%n</recording>%n"));
+>>>>>>> Stashed changes
 			}
 			writer.print(sb);
 			writer.close();
@@ -51,9 +93,10 @@ public class Exercise3 {
 
 	public void importRecordings(String fileName) {
 		try {
-			FileReader fileReader = new FileReader(fileName);
-			BufferedReader reader = new BufferedReader(fileReader);
+			BufferedReader reader = new BufferedReader(new FileReader(fileName));
+			int numberOfRecordings = Integer.parseInt(reader.readLine());
 			String line;
+<<<<<<< Updated upstream
 			line = reader.readLine();
 			while ((line = reader.readLine()) != null) {
 
@@ -70,17 +113,25 @@ public class Exercise3 {
 
 				Recording recording = new Recording(parsad[1], parsad[0], Integer.parseInt(parsad[2]), genres);
 				recordings.add(recording);
+=======
+			int j = 0;
+			while (((line = reader.readLine()) != null) && j < numberOfRecordings) {
+				String[] recInfo = line.split(";");
+				int numberOfGenres = Integer.parseInt(reader.readLine());
+				Set<String> setOfGenres = new HashSet<>();
+				for (int i = 0; i < numberOfGenres; i++) 
+					setOfGenres.add(reader.readLine());
+				recordings.add(new Recording(recInfo[1], recInfo[0], Integer.parseInt(recInfo[2]), setOfGenres));
+				j++;
+>>>>>>> Stashed changes
 			}
-			fileReader.close();
 			reader.close();
-		} catch (FileNotFoundException e) {
-			System.out.printf("%s not found%n", fileName);
-
+		} catch (FileNotFoundException e) { 
+			System.out.printf("File \"%s\" not found, please try again.%n", fileName);
 		} catch (IOException e) {
+			System.out.print("System trace: ");
 			e.printStackTrace();
-
 		}
-
 	}
 
 	public Map<Integer, Double> importSales(String fileName) {
@@ -98,7 +149,11 @@ public class Exercise3 {
 			}
 			dis.close();
 			return salesData;
+<<<<<<< Updated upstream
 
+=======
+			
+>>>>>>> Stashed changes
 		} catch (FileNotFoundException e) {
 			System.out.printf("Filen %s kunde inte hittas, vänligen försök igen.", fileName);
 		} catch (IOException e) {

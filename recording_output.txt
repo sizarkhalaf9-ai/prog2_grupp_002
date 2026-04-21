@@ -1,4 +1,5 @@
 <recording>
+<<<<<<< Updated upstream
 <artist>John Coltrane</artist>
 <title>A Love Supreme</title>
 <year>1965</year>
@@ -52,3 +53,58 @@
 <genre>Soul</genre>
 </genres>
 </recording>
+=======
+  <artist>John Coltrane</artist>
+  <title>A Love Supreme</title>
+  <year>1965</year>
+  <genres>
+    <genre>Jazz</genre>
+  </genres>
+</recordings>
+<recording>
+  <artist>The Cure</artist>
+  <title>Boys Don't Cry</title>
+  <year>1979</year>
+  <genres>
+    <genre>Rock</genre>
+    <genre>New Wave</genre>
+    <genre>Post-Punk</genre>
+  </genres>
+</recordings>
+<recording>
+  <artist>John Coltrane</artist>
+  <title>Giant Steps</title>
+  <year>1959</year>
+  <genres>
+    <genre>Jazz</genre>
+  </genres>
+</recordings>
+<recording>
+  <artist>Phoebe Bridgers</artist>
+  <title>Punisher</title>
+  <year>2021</year>
+  <genres>
+    <genre>Jazz</genre>
+  </genres>
+</recordings>
+<recording>
+  <artist>The White Stripes</artist>
+  <title>White Blood Cells</title>
+  <year>2001</year>
+  <genres>
+    <genre>Rock</genre>
+    <genre>Alternative Rock</genre>
+    <genre>Blues Rock</genre>
+    <genre>Indie Rock</genre>
+    <genre>Garage Rock</genre>
+  </genres>
+</recordings>
+<recording>
+  <artist>Tom Misch & Yussef Dayes</artist>
+  <title>What Kinda Music</title>
+  <year>2021</year>
+  <genres>
+    <genre>Soul</genre>
+  </genres>
+</recordings>
+>>>>>>> Stashed changes
