@@ -1,9 +1,9 @@
 package se.su.inlupp;
 
 public class EdgeClass<T> implements Edge<T> {
-    private T destination; 
+    private T destination;
     private String name;
-    private int weight; 
+    private int weight;
 
     public EdgeClass(T destination, String name, int weight) {
         this.destination = destination;
@@ -16,7 +16,7 @@ public class EdgeClass<T> implements Edge<T> {
     }
 
     public void setWeight(int weight) {
-        if (weight < 0) 
+        if (weight < 0)
             throw new IllegalArgumentException();
         this.weight = weight;
     }
@@ -30,6 +30,8 @@ public class EdgeClass<T> implements Edge<T> {
     }
 
     public String toString() {
-        return destination.toString() + ": " + name + ", " + weight;
+        return "till " + destination.toString() + " med " + name + " tar " + weight;
     }
+
+    
 }
