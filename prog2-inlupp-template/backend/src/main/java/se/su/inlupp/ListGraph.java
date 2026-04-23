@@ -23,17 +23,16 @@ public class ListGraph<T> implements Graph<T> {
       throw new NoSuchElementException();
 
     Set<Edge<T>> edges = new HashSet<>(graph.get(node));
-
     for (Edge<T> edge : edges) {
       T destination = edge.getDestination();
       disconnect(node, destination);
     }
-
     graph.remove(node);
   }
 
   @Override
   public boolean hasNode(T node) {
+    
     return graph.containsKey(node);
   }
 
@@ -46,14 +45,10 @@ public class ListGraph<T> implements Graph<T> {
     this.add(node1);
     this.add(node2);
 
-    Edge<T> edge1 = new EdgeClass<>(node2, name, weight);
-    Edge<T> edge2 = new EdgeClass<>(node1, name, weight);
-
     if (getEdgeBetween(node1, node2) == null) {
-      graph.get(node1).add(edge1);
-      graph.get(node2).add(edge2);
-    } else
-      throw new IllegalStateException();
+      graph.get(node1).add(new EdgeClass<>(node2, name, weight));
+      graph.get(node2).add(new EdgeClass<>(node1, name, weight));
+    } else throw new IllegalStateException();
   }
 
   @Override
@@ -64,7 +59,7 @@ public class ListGraph<T> implements Graph<T> {
     Edge<T> edge1 = getEdgeBetween(node1, node2);
     Edge<T> edge2 = getEdgeBetween(node2, node1);
 
-    if (edge1 == null || edge2 == null)
+    if (getEdgeBetween(node1, node2) == null || getEdgeBetween(node2, node1) == null)
       throw new IllegalStateException();
     else {
       graph.get(node1).remove(edge1);
@@ -74,8 +69,8 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public void setConnectionWeight(T node1, T node2, int weight) {
-    if (!graph.containsKey(node1) || !graph.containsKey(node2) || getEdgeBetween(node1, node2) == null
-        || getEdgeBetween(node2, node1) == null)
+    if (!graph.containsKey(node1) || !graph.containsKey(node2) || 
+        getEdgeBetween(node1, node2) == null || getEdgeBetween(node2, node1) == null)
       throw new NoSuchElementException();
     if (weight < 0) throw new IllegalArgumentException();
 
@@ -85,6 +80,7 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public Set<T> getNodes() {
+
     return graph.keySet();
   }
 
@@ -103,6 +99,7 @@ public class ListGraph<T> implements Graph<T> {
 
     for (Edge<T> edge : graph.get(node1)) {
       if (edge.getDestination().equals(node2))
+
         return edge;
     }
     return null;
@@ -118,14 +115,14 @@ public class ListGraph<T> implements Graph<T> {
         sb.append(edge.toString() + ", ");
       }
     }
-
     String string = sb.toString();
-    string = string.substring(0, string.length() - 1);
-    return string;
+  
+    return string.substring(0, string.length() - 1);
   }
 
   @Override
   public Iterator<T> iterator() {
+
     return graph.keySet().iterator();
   }
 }
