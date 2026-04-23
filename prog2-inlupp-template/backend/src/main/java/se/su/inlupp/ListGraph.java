@@ -19,9 +19,8 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public void remove(T node) {
-    if (!graph.containsKey(node)) {
+    if (!graph.containsKey(node))
       throw new NoSuchElementException();
-    }
 
     Set<Edge<T>> edges = new HashSet<>(graph.get(node));
 
@@ -40,12 +39,10 @@ public class ListGraph<T> implements Graph<T> {
 
   @Override
   public void connect(T node1, T node2, String name, int weight) {
-    if (!graph.containsKey(node1) || !graph.containsKey(node2)) {
+    if (!graph.containsKey(node1) || !graph.containsKey(node2))
       throw new NoSuchElementException();
-    }
-    if (weight < 0) {
-      throw new IllegalArgumentException();
-    }
+    if (weight < 0) throw new IllegalArgumentException();
+
     this.add(node1);
     this.add(node2);
 
@@ -55,10 +52,8 @@ public class ListGraph<T> implements Graph<T> {
     if (getEdgeBetween(node1, node2) == null) {
       graph.get(node1).add(edge1);
       graph.get(node2).add(edge2);
-    } else {
+    } else
       throw new IllegalStateException();
-    }
-
   }
 
   @Override
@@ -69,9 +64,9 @@ public class ListGraph<T> implements Graph<T> {
     Edge<T> edge1 = getEdgeBetween(node1, node2);
     Edge<T> edge2 = getEdgeBetween(node2, node1);
 
-    if (edge1 == null || edge2 == null) {
+    if (edge1 == null || edge2 == null)
       throw new IllegalStateException();
-    } else {
+    else {
       graph.get(node1).remove(edge1);
       graph.get(node2).remove(edge2);
     }
@@ -82,8 +77,7 @@ public class ListGraph<T> implements Graph<T> {
     if (!graph.containsKey(node1) || !graph.containsKey(node2) || getEdgeBetween(node1, node2) == null
         || getEdgeBetween(node2, node1) == null)
       throw new NoSuchElementException();
-    if (weight < 0)
-      throw new IllegalArgumentException();
+    if (weight < 0) throw new IllegalArgumentException();
 
     getEdgeBetween(node1, node2).setWeight(weight);
     getEdgeBetween(node2, node1).setWeight(weight);
@@ -119,43 +113,19 @@ public class ListGraph<T> implements Graph<T> {
     StringBuilder sb = new StringBuilder();
     Set<T> allNodes = getNodes();
     for (T node : allNodes) {
-
+      sb.append(node.toString() + ", ");
       for (Edge<T> edge : getEdgesFrom(node)) {
         sb.append(edge.toString() + ", ");
       }
     }
-    return sb.toString();
+
+    String string = sb.toString();
+    string = string.substring(0, string.length() - 1);
+    return string;
   }
 
-  /*
-   * Letade efter följande ord:
-   * [A, B, till B med G -] B tar 28, C, D, E, till D med C -] D tar 5, F, G, H,
-   * I, J, till B med B -] D tar 2, till I med D -] I tar 1, till C med E -] C tar
-   * 2, till J med J -] D tar 5, till I med H -] I tar 3, till D med D -] I tar 1,
-   * till B med B -] F tar 5, till E med E -] D tar 2, till H med F -] H tar 1, X,
-   * till H med H -] D tar 1, till C med C -] D tar 5, till C med B -] C tar 3,
-   * till G med A -] G tar 3, till H med H -] I tar 3, till B med B -] C tar 3,
-   * till D med H -] D tar 1, till D med E -] D tar 2, till F med B -] F tar 5,
-   * till E med E -] C tar 2, till F med F -] H tar 1, till G med G -] B tar 28,
-   * till D med B -] D tar 2, till A med A -] G tar 3, till D med J -] D tar 5] i
-   * strängen:
-   * 
-   * till G med A -] G tar 3, till F med B -] F tar 5, till C med B -] C tar 3,
-   * till D med B -] D tar 2, till G med G -] B tar 28, till B med B -] C tar 3,
-   * till D med C -] D tar 5, till E med E -] C tar 2, till J med J -] D tar 5,
-   * till H med H -] D tar 1, till B med B -] D tar 2, till C med C -] D tar 5,
-   * till I med D -] I tar 1, till E med E -] D tar 2, till C med E -] C tar 2,
-   * till D med E -] D tar 2, till H med F -] H tar 1, till B med B -] F tar 5,
-   * till B med G -] B tar 28, till A med A -] G tar 3, till F med F -] H tar 1,
-   * till D med H -] D tar 1, till I med H -] I tar 3, till D med D -] I tar 1,
-   * till H med H -] I tar 3, till D med J -] D tar 5,
-   * men något saknades.
-   * ==] expected: [true] but was: [false
-   */
-  // "till G med A -> G tar 3"
   @Override
   public Iterator<T> iterator() {
     return graph.keySet().iterator();
   }
-
 }
