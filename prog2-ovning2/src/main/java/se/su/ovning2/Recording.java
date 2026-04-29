@@ -50,7 +50,6 @@ public class Recording {
 
     }
     return false;
-
   }
 
   public int hashCode() {
