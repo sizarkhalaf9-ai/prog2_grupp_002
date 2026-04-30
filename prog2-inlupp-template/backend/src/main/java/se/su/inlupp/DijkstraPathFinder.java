@@ -3,7 +3,10 @@ package se.su.inlupp;
 import java.util.*;
 
 public class DijkstraPathFinder<T> implements PathFinder<T> {
-    
+    public static void main(String[] args) {
+        
+    }
+
     public Path<T> findPath(Graph<T> graph, T start, T end) {
         Map<T, Integer> shortestDistance = new HashMap<>();
         Map<T, T> previousNode = new HashMap<>();
