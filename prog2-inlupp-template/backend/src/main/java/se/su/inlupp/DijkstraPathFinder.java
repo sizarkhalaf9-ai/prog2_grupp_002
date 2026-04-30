@@ -4,27 +4,29 @@ import java.util.*;
 
 public class DijkstraPathFinder<T> implements PathFinder<T> {
     public static void main(String[] args) {
-        
+
     }
 
     public Path<T> findPath(Graph<T> graph, T start, T end) {
         Map<T, Integer> shortestDistance = new HashMap<>();
         Map<T, T> previousNode = new HashMap<>();
 
-        //Fyll tabellerna för distanser mellan startnod och alla andra noder med utgångsvärden
-        //samt alla noder i tabellen previous och sätter prev för alla till null
+        // Fyll tabellerna för distanser mellan startnod och alla andra noder med
+        // utgångsvärden
+        // samt alla noder i tabellen previous och sätter prev för alla till null
         for (T node : graph.getNodes()) {
             shortestDistance.put(node, Integer.MAX_VALUE);
             previousNode.put(node, null);
         }
-        shortestDistance.put(start, 0); //gör distansen till startnoden 0
+        shortestDistance.put(start, 0); // gör distansen till startnoden 0
 
-        //Skapa prioritetskö & sätt in första noden med distans 0 & skapa bokföring av besökta noder
-        PriorityQueue<Pair<T>> queue = new PriorityQueue<>();
-        queue.add(new Pair<T>(0, start));
+        // Skapa prioritetskö & sätt in första noden med distans 0 & skapa bokföring av
+        // besökta noder
+        PriorityQueue<Pair> queue = new PriorityQueue<>();
+        queue.add(new Pair(0, start));
         Set<T> visitedNodes = new HashSet<>();
 
-        //Själva algoritmen
+        // Själva algoritmen
         while (!queue.isEmpty()) {
             T currentNode = queue.poll().getNode();
             if (currentNode.equals(end)) {
@@ -40,16 +42,16 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
                 if (totalWeight < shortestDistance.get(nextNode)) {
                     shortestDistance.put(nextNode, totalWeight);
                     previousNode.put(nextNode, currentNode);
-                    queue.add(new Pair<T>(shortestDistance.get(nextNode), nextNode));
+                    queue.add(new Pair(shortestDistance.get(nextNode), nextNode));
                 }
             }
         }
-        
+
         if (shortestDistance.get(end) == Integer.MAX_VALUE) {
             return null;
         }
 
-        //Skapa listor av noder och kanter för ett Path-objekt
+        // Skapa listor av noder och kanter för ett Path-objekt
         List<T> nodes = new ArrayList<>();
         List<Edge<T>> edges = new ArrayList<>();
         nodes.add(end);
@@ -66,7 +68,7 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
         return new PathClass<T>(start, end, edges, nodes);
     }
 
-    private class Pair<T> implements Comparable<Pair<T>> {
+    private class Pair implements Comparable<Pair> {
         private int weight;
         private T node;
 
@@ -88,12 +90,12 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
         }
 
         @Override
-        public int compareTo(Pair<T> p) {
+        public int compareTo(Pair p) {
             return weight - p.weight;
         }
 
         public boolean equals(Object o) {
-            if (o instanceof DijkstraPathFinder<T>.Pair<T> p) {
+            if (o instanceof DijkstraPathFinder.Pair p) {
                 return Objects.equals(node, p.getNode());
             }
             return false;
