@@ -2,8 +2,6 @@ package my.projects;
 
 import java.util.List;
 
-import javax.smartcardio.Card;
-
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.event.EventHandler;
