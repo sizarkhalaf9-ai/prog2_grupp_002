@@ -18,14 +18,11 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
         queue.add(new SortableEntrylikeObject(0, start));
         Set<T> visitedNodes = new HashSet<>();
 
-        while (!queue.isEmpty()) {
-            T currentNode = queue.poll().getNode();
-            if (currentNode.equals(end)) {
-                break;
-            }
-            if (visitedNodes.contains(currentNode)) {
-                continue;
-            }
+        T currentNode = start;
+        while (!queue.isEmpty() && !currentNode.equals(end)) {
+            currentNode = queue.poll().getNode();
+            if (visitedNodes.contains(currentNode)) continue;
+    
             visitedNodes.add(currentNode);
             for (Edge<T> edge : graph.getEdgesFrom(currentNode)) {
                 T nextNode = edge.getDestination();
@@ -38,9 +35,7 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
             }
         }
 
-        if (shortestDistance.get(end) == Integer.MAX_VALUE) {
-            return null;
-        }
+        if (previousNode.get(end) == null) return null;
 
         List<T> nodes = new ArrayList<>();
         List<Edge<T>> edges = new ArrayList<>();
@@ -59,6 +54,7 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
     }
 
     private class SortableEntrylikeObject implements Comparable<SortableEntrylikeObject> {
+        
         private int weight;
         private T node;
 
@@ -74,17 +70,6 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
         @Override
         public int compareTo(SortableEntrylikeObject p) {
             return weight - p.weight;
-        }
-
-        public boolean equals(Object o) {
-            if (o instanceof DijkstraPathFinder.SortableEntrylikeObject p) {
-                return Objects.equals(node, p.getNode());
-            }
-            return false;
-        }
-
-        public int hashCode() {
-            return Objects.hash(node);
         }
     }
 }

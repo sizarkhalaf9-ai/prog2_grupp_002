@@ -93,7 +93,7 @@ public class PathFinderTest {
         // 3. Kör sökningen
         System.out.println("\n--- Test 2: Gävle till Luleå ---");
         Path<City> northPath = finder.findPath(northGraph, gavle, lulea);
-
+        
         if (northPath != null) {
             List<Edge<City>> edges = northPath.getEdges();
             int weight = 0;
@@ -111,5 +111,51 @@ public class PathFinderTest {
         } else {
             System.out.println("FAIL: Ingen väg hittades!");
         }
+
+        ///////////////////////////////////////////////////////////
+        ListGraph<City> testGraph = new ListGraph<>();
+        DijkstraPathFinder<City> lowestWeightFinder = new DijkstraPathFinder<>();
+
+        // 1. Skapa städer
+        City A = new City("A");
+        City B = new City("B");
+        City C = new City("C");
+        City D = new City("D");
+        City E = new City("E");
+        City F = new City("F");
+        City G = new City("G");
+
+        testGraph.add(A);
+        testGraph.add(B);
+        testGraph.add(C);
+        testGraph.add(D);
+        testGraph.add(E);
+        testGraph.add(F);
+        testGraph.add(G);
+
+        testGraph.connect(A, B, "", 2);
+        testGraph.connect(A, D, "", 5);
+        testGraph.connect(A, F, "", 3);
+        testGraph.connect(B, C, "", 7);
+        testGraph.connect(B, E, "", 1);
+        testGraph.connect(B, F, "", 4);
+        testGraph.connect(C, E, "", 3);
+        testGraph.connect(C, G, "", 4);
+        testGraph.connect(D, E, "", 1);
+        testGraph.connect(D, G, "", 1);
+        testGraph.connect(E, G, "", 3);
+
+        // System.out.println("\nVÄGEN MED LÄGST VIKT: ");
+
+        Path<City> testResult = lowestWeightFinder.findPath(testGraph, A, C);
+        System.out.println("Till C: " + testResult.getTotalWeight());
+        testResult = lowestWeightFinder.findPath(testGraph, A, E);
+        System.out.println("Till E: " + testResult.getTotalWeight());
+        testResult = lowestWeightFinder.findPath(testGraph, A, G);
+        System.out.println("Till G: " + testResult.getTotalWeight());
+        testResult = lowestWeightFinder.findPath(testGraph, A, F);
+        System.out.println("Till F: " + testResult.getTotalWeight());
+        testResult = lowestWeightFinder.findPath(testGraph, A, D);
+        System.out.println("Till D: " + testResult.getTotalWeight());
     }
 }
