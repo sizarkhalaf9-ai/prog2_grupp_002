@@ -41,6 +41,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        Graph<String> graph = new ListGraph<String>();
 
         BorderPane root = new BorderPane();
         center = new Pane();
