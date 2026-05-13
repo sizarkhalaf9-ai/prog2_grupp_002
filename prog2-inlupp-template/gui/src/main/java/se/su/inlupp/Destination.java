@@ -1,0 +1,61 @@
+package se.su.inlupp;
+
+import javafx.event.EventHandler;
+import javafx.scene.Cursor;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
+
+public class Destination extends Pane {
+
+    private double startX;
+    private double startY;
+
+    public Destination(double x, double y) {
+        relocate(x - 10, y - 19);
+        
+        ImageView image = new ImageView(new Image(Destination.class.getResourceAsStream("/nål.png")));
+        image.setFitHeight(20);
+        image.setFitWidth(20);
+        getChildren().add(image);
+        setPrefSize(20,20);
+
+        setOnMousePressed(new StartDragHandler());
+        setOnMouseDragged(new DragHandler());
+        setOnKeyPressed(new KeyHandler());
+    }
+
+    class DragHandler implements EventHandler<MouseEvent> {
+        public void handle(MouseEvent event) {
+            double newX = getLayoutX() + event.getX() - startX;
+            double newY = getLayoutY() + event.getY() - startY;
+            setCursor(Cursor.CLOSED_HAND);
+            relocate(newX, newY);
+        }
+    }
+
+    class StartDragHandler implements EventHandler<MouseEvent> {
+        public void handle(MouseEvent event) {
+            startX = event.getX();
+            startY = event.getY();
+        }
+    }
+
+    class KeyHandler implements EventHandler<KeyEvent> {
+        @Override
+        public void handle(KeyEvent event) {
+            double x = getLayoutX();
+            double y = getLayoutY();
+            switch (event.getCode()) {
+                case DOWN: y += 1; break;
+                case UP: y -= 1; break; 
+                case RIGHT: x += 1; break; 
+                case LEFT: x -= 1; break; 
+            }
+            event.consume(); //när händelsen har inträffat måste den konsumeras och ersättas av annan händelse
+            relocate(x, y);
+        }
+    }
+}
