@@ -23,7 +23,9 @@ public class CityClass {
     return this.x;
   }
 
-  public double getY() {}
+  public double getY() {
+    return this.y;
+  }
 
   @Override
   public boolean equals(Object obj) {
