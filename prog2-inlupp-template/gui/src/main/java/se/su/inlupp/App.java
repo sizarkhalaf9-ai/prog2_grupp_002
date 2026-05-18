@@ -68,15 +68,13 @@ public class App extends Application {
 
     private Destination pendingNode;
 
-    // Nytt: håller reda på vilken stad som är markerad
     private City selectedCity;
 
-    // Nytt: kopplar varje City till sin grafiska Destination på kartan
     private Map<City, Destination> cityDestinations = new HashMap<>();
 
     private ObservableList<String> obsList = FXCollections.observableArrayList();
 
-    private Graph<City> listGraph = new ListGraph<City>();
+    private Graph<City> listGraph = new ListGraph<>();
 
     @Override
     public void start(Stage stage) {
@@ -93,7 +91,6 @@ public class App extends Application {
         Menu file = new Menu("Arkiv");
 
         MenuItem neew = new MenuItem("Ny");
-        // neew.setOnAction(new NewHandler());
 
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
@@ -118,6 +115,8 @@ public class App extends Application {
         Menu remove = new Menu("Ta bort");
 
         MenuItem addNode = new MenuItem("Nod");
+        addNode.setOnAction(new AddNodeHandler());
+
         MenuItem addEdge = new MenuItem("Kant");
 
         MenuItem removeNode = new MenuItem("Nod");
@@ -144,7 +143,6 @@ public class App extends Application {
 
         saveNewNode.setDisable(true);
 
-        // Nytt: knapp för att ta bort markerad nod
         Button removeNodeButton = new Button("Ta bort nod");
         removeNodeButton.setOnAction(new RemoveNodeHandler());
 
@@ -244,10 +242,11 @@ public class App extends Application {
             listGraph.add(city);
 
             if (pendingNode != null) {
-                // Nytt: gör noden klickbar så att den kan markeras
-                pendingNode.setOnMouseClicked(mouseEvent -> selectCity(city));
+                pendingNode.setOnMouseClicked(mouseEvent -> {
+                    mouseEvent.consume();
+                    selectCity(city);
+                });
 
-                // Nytt: spara kopplingen mellan grafens nod och JavaFX-nålen
                 cityDestinations.put(city, pendingNode);
 
                 pendingNode = null;
@@ -290,7 +289,6 @@ public class App extends Application {
         }
     }
 
-    // Nytt: markerar en stad när man klickar på den
     private void selectCity(City city) {
         if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
             cityDestinations.get(selectedCity).setStyle("");
@@ -308,7 +306,6 @@ public class App extends Application {
         }
     }
 
-    // Nytt: tar bort markerad nod
     class RemoveNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             if (selectedCity == null) {
@@ -321,10 +318,8 @@ public class App extends Application {
             }
 
             try {
-                // Tar bort noden från grafen
                 listGraph.remove(selectedCity);
 
-                // Tar bort noden från JavaFX-kartan
                 Destination destination = cityDestinations.remove(selectedCity);
 
                 if (destination != null) {
@@ -344,6 +339,25 @@ public class App extends Application {
         }
     }
 
+    private void redrawCitiesFromGraph() {
+        center.getChildren().removeIf(node -> node instanceof Destination);
+
+        cityDestinations.clear();
+        selectedCity = null;
+
+        for (City city : listGraph.getNodes()) {
+            Destination destination = new Destination(city.x(), city.y());
+
+            destination.setOnMouseClicked(mouseEvent -> {
+                mouseEvent.consume();
+                selectCity(city);
+            });
+
+            cityDestinations.put(city, destination);
+            center.getChildren().add(destination);
+        }
+    }
+
     class PopupHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
             double x = event.getX();
@@ -359,33 +373,6 @@ public class App extends Application {
             popupWindow.show();
         }
     }
-
-    /*
-     * class NewHandler implements EventHandler<ActionEvent> {
-     * public void handle(ActionEvent event) {
-     * if (hasUnsavedChanges) {
-     * Alert alert = new Alert(
-     * AlertType.CONFIRMATION,
-     * "Det finns osparade ändringar. Vill du avsluta ändå?"
-     * );
-     * alert.setHeaderText("Osparade ändringar");
-     * alert.setTitle("Varning");
-     * 
-     * Optional<ButtonType> clicked = alert.showAndWait();
-     * 
-     * if (clicked.isPresent() && clicked.get().equals(ButtonType.CANCEL)) {
-     * event.consume();
-     * } else if (clicked.get().equals(ButtonType.OK)) {
-     * SaveHandler save = new SaveHandler();
-     * fileChooser.setInitialDirectory(new File("."));
-     * File fileName = fileChooser.showSaveDialog(stage);
-     * }
-     * } else {
-     * // Rensa alla nålar och allt innehåll i listGraph.
-     * }
-     * }
-     * }
-     */
 
     class SaveHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
@@ -448,6 +435,8 @@ public class App extends Application {
                 ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
                 listGraph = (Graph<City>) inputStream.readObject();
                 inputStream.close();
+
+                redrawCitiesFromGraph();
 
                 obsList.clear();
                 obsList.addAll(listGraph.getNodes().toString());
