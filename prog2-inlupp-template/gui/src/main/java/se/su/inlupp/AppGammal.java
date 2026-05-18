@@ -1,5 +1,6 @@
 package se.su.inlupp;
 
+import java.awt.Desktop.Action;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,17 +8,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
-import org.w3c.dom.events.Event;
-
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -31,9 +27,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -47,8 +41,11 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import se.su.inlupp.App.OpenHandler;
+import se.su.inlupp.App.SaveHandler;
+import se.su.inlupp.App.SaveImageHandler;
 
-public class App extends Application {
+public class AppGammal extends Application {
 
     private Stage stage;
     private Pane center;
@@ -59,11 +56,7 @@ public class App extends Application {
     private AddNodeHandler addNodeHandler;
     private FileChooser fileChooser = new FileChooser();
     private boolean hasUnsavedChanges = false;
-    private TextField newNodeName = new TextField();
-    private Button saveNewNode = new Button("Spara nod");
-    private double newNodeX;
-    private double newNodeY;
-    private ObservableList<String> obsList = FXCollections.observableArrayList();
+
     private Graph<City> listGraph = new ListGraph<City>();
 
     @Override
@@ -83,12 +76,8 @@ public class App extends Application {
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
         open.setOnAction(openHandler);
-        Menu save = new Menu("Spara...");
-        MenuItem saveGraph = new MenuItem("Projekt");
-        MenuItem saveImage = new MenuItem("Bild");
-        save.getItems().addAll(saveGraph, saveImage);
-        saveGraph.setOnAction(new SaveHandler());
-        saveImage.setOnAction(new SaveImageHandler());
+        MenuItem save = new MenuItem("Spara...");
+        save.setOnAction(new SaveHandler());
         MenuItem exit = new MenuItem("Avsluta");
         exit.setOnAction(new CloseWindowHandler());
         file.getItems().addAll(neew, open, save, exit);
@@ -108,38 +97,42 @@ public class App extends Application {
         root.setTop(top);
 
         VBox right = new VBox(10);
-        Label editLabel = new Label("Redigera");
-        editLabel.setStyle("-fx-font: 22 'Copperplate'; -fx-font-weight: bold;");
-        addNodeButton = new Button("Lägg till stad");
-        addNodeHandler = new AddNodeHandler();
-        addNodeButton.setOnAction(addNodeHandler);
-        Label newNodeNameLabel = new Label("Ange stadens namn");
-        saveNewNode.setDisable(true);
-
+        Label menuLabel = new Label("Meny");
+        menuLabel.setStyle("-fx-font: 22 'Copperplate'; -fx-font-weight: bold;");
+        Button newButton = new Button("Ny");
         Button openButton = new Button("Öppna");
         openButton.setOnAction(openHandler);
         saveButton = new Button("Spara karta");
         saveButton.setOnAction(new SaveImageHandler());
         Button exitButton = new Button("Avsluta");
-        List<Button> rightButtons = List.of(addNodeButton, openButton, saveButton, exitButton);
+        Button algorithmButton = new Button("Välj\nSökalgoritm");
+        List<Button> rightButtons = List.of(newButton, openButton, saveButton, exitButton, algorithmButton);
         for (Button button : rightButtons) {
-            button.setPrefWidth(110);
+            button.setPrefWidth(90);
             button.setTextAlignment(TextAlignment.CENTER);
         }
-
-        MenuButton algorithmButton = new MenuButton("Välj\nSökalgoritm");
-        algorithmButton.setPrefWidth(110);
-        //algorithmButton.setTextAlignment(TextAlignment.CENTER);
-        MenuItem dfs = new MenuItem("Djupet först-sökning");
-        MenuItem bfs = new MenuItem("Bredden först-sökning");
-        MenuItem dijkstra = new MenuItem("Dijkstras algoritm");
-        algorithmButton.getItems().addAll(dfs, bfs, dijkstra);
-
-        right.getChildren().addAll(editLabel, addNodeButton, newNodeNameLabel, newNodeName, saveNewNode, openButton, saveButton, exitButton, algorithmButton);
+        right.getChildren().addAll(menuLabel, newButton, openButton, saveButton, exitButton, algorithmButton);
         right.setAlignment(Pos.TOP_CENTER);
         right.setPadding(femPx);
         right.setStyle(font);
         root.setRight(right);
+
+        HBox bottom = new HBox(10);
+        addNodeButton = new Button("Lägg till nod");
+        addNodeHandler = new AddNodeHandler();
+        addNodeButton.setOnAction(addNodeHandler);
+        Button taBortNod = new Button("Ta bort nod");
+        Button läggTillKant = new Button("Lägg till kant");
+        Button taBortKant = new Button("Ta bort kant");
+        /*List<Button> bottomButtons = List.of(läggTillNod, taBortNod, läggTillKant, taBortKant);
+        for (Button button : bottomButtons) {
+            button.setOnMouseClicked(new ClickHandler());
+        }*/
+        bottom.getChildren().addAll(addNodeButton, taBortNod, läggTillKant, taBortKant);
+        bottom.setAlignment(Pos.CENTER);
+        bottom.setPadding(femPx);
+        bottom.setStyle(font);
+        root.setBottom(bottom);
 
         Scene scene = new Scene(root);
         stage.setTitle("Reseplanerare");
@@ -167,42 +160,26 @@ public class App extends Application {
             }
         }
     }
-
-    class SaveNewNodeHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent event) {
-            if(newNodeName.getText().trim().isEmpty()) { 
-                Alert alert = new Alert(AlertType.WARNING, "Du måste ange stad");
-                event.consume();
-            } else {
-                listGraph.add(new City(newNodeName.getText(), newNodeX, newNodeY));
-                center.setOnMouseClicked(null);
-                center.setCursor(Cursor.DEFAULT);
-                addNodeButton.setDisable(false);
-            }
-        }
-    }
-
     class PutNodeHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
-            newNodeX = event.getX();
-            newNodeY = event.getY();
+            double x = event.getX();
+            double y = event.getY();
 
-            Destination needle = new Destination(newNodeX, newNodeY);
+            Destination needle = new Destination(x, y);
             center.getChildren().add(needle);
-            
+
             hasUnsavedChanges = true;
-            saveNewNode.setDisable(false);
-            saveNewNode.setOnAction(new SaveNewNodeHandler());
-            
-            /*center.setOnMouseClicked(null);
+
+            //Återställ allt när needle är tillagd i center
+            center.setOnMouseClicked(null);
             center.setCursor(Cursor.DEFAULT);
-            addNodeButton.setDisable(false);*/
+            addNodeButton.setDisable(false);    
         }
     }
 
     class AddNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
-            PutNodeHandler putNodeHandler = new PutNodeHandler();
+            putNodeHandler = new PutNodeHandler();
             center.setOnMouseClicked(putNodeHandler);
             center.setCursor(Cursor.CROSSHAIR);
             addNodeButton.setDisable(true);
@@ -280,24 +257,18 @@ public class App extends Application {
         public void handle(ActionEvent event) {
             fileChooser.setInitialDirectory(new File("."));
             File fileName = fileChooser.showOpenDialog(stage);
-            try {
+            /*try {
                 ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
-                listGraph = (Graph<City>) inputStream.readObject();
-                inputStream.close();
+                dataMap = (Map) inputStream.readObject();
+                ois.close();
                 obsList.clear();
-                obsList.addAll(listGraph.getNodes().toString());
+                obsList.addAll(dataMap.keySet());
             } catch (IOException e) {
                 Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte hittas");
-                alert.showAndWait();
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            hasUnsavedChanges = false;
+            }*/
         }
     }
 
-    public record City(String name, double x, double y) implements Serializable {}
 
     public static void main( String[] args ) {
         launch(args);

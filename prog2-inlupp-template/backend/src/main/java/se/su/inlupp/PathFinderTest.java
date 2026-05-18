@@ -4,15 +4,15 @@ import java.util.List;
 
 public class PathFinderTest {
     public static void main(String[] args) {
-        ListGraph<City> swedenGraph = new ListGraph<>();
-        DijkstraPathFinder<City> pathFinder = new DijkstraPathFinder<>();
+        ListGraph<CityClass> swedenGraph = new ListGraph<>();
+        DijkstraPathFinder<CityClass> pathFinder = new DijkstraPathFinder<>();
 
         // 1. Skapa städer
-        City stockholm = new City("Stockholm");
-        City uppsala = new City("Uppsala");
-        City enköping = new City("Enköping");
-        City västerås = new City("Västerås");
-        City örebro = new City("Örebro");
+        CityClass stockholm = new CityClass("Stockholm");
+        CityClass uppsala = new CityClass("Uppsala");
+        CityClass enköping = new CityClass("Enköping");
+        CityClass västerås = new CityClass("Västerås");
+        CityClass örebro = new CityClass("Örebro");
 
         swedenGraph.add(stockholm);
         swedenGraph.add(uppsala);
@@ -31,15 +31,15 @@ public class PathFinderTest {
         // 3. Anropa findPath
         System.out.println("Söker kortaste vägen med Dijkstra...");
 
-        Path<City> pathResult = pathFinder.findPath(swedenGraph, stockholm, örebro);
+        Path<CityClass> pathResult = pathFinder.findPath(swedenGraph, stockholm, örebro);
 
         // 4. Validera och beräkna vikt manuellt
         if (pathResult != null) {
-            List<Edge<City>> edges = pathResult.getEdges(); 
+            List<Edge<CityClass>> edges = pathResult.getEdges(); 
             int totalWeight = 0;
             
             System.out.println("Väg hittad från " + stockholm + " till " + örebro + ":");
-            for (Edge<City> edge : edges) {
+            for (Edge<CityClass> edge : edges) {
                 System.out.println("- " + edge.getName() + " -> " + edge.getDestination() + " (" + edge.getWeight() + ")");
                 totalWeight += edge.getWeight(); // Summera vikten här istället
             }
@@ -57,16 +57,16 @@ public class PathFinderTest {
             System.out.println("RESULTAT: FAIL! Ingen väg hittades.");
         }
        // --- NYTT TESTFALL: Norrlandsresan ---
-        ListGraph<City> northGraph = new ListGraph<>();
-        DijkstraPathFinder<City> finder = new DijkstraPathFinder<>();
+        ListGraph<CityClass> northGraph = new ListGraph<>();
+        DijkstraPathFinder<CityClass> finder = new DijkstraPathFinder<>();
 
         // 1. Skapa städer
-        City gavle = new City("Gävle");
-        City sundsvall = new City("Sundsvall");
-        City lulea = new City("Luleå");
-        City ostersund = new City("Östersund");
-        City umea = new City("Umeå");
-        City kiruna = new City("Kiruna"); // Blindgränd
+        CityClass gavle = new CityClass("Gävle");
+        CityClass sundsvall = new CityClass("Sundsvall");
+        CityClass lulea = new CityClass("Luleå");
+        CityClass ostersund = new CityClass("Östersund");
+        CityClass umea = new CityClass("Umeå");
+        CityClass kiruna = new CityClass("Kiruna"); // Blindgränd
 
         northGraph.add(gavle);
         northGraph.add(sundsvall);
@@ -92,12 +92,12 @@ public class PathFinderTest {
 
         // 3. Kör sökningen
         System.out.println("\n--- Test 2: Gävle till Luleå ---");
-        Path<City> northPath = finder.findPath(northGraph, gavle, lulea);
+        Path<CityClass> northPath = finder.findPath(northGraph, gavle, lulea);
         
         if (northPath != null) {
-            List<Edge<City>> edges = northPath.getEdges();
+            List<Edge<CityClass>> edges = northPath.getEdges();
             int weight = 0;
-            for (Edge<City> e : edges) {
+            for (Edge<CityClass> e : edges) {
                 System.out.println("Från nod till " + e.getDestination() + " via " + e.getName() + " (" + e.getWeight() + ")");
                 weight += e.getWeight();
             }
@@ -113,17 +113,17 @@ public class PathFinderTest {
         }
 
         ///////////////////////////////////////////////////////////
-        ListGraph<City> testGraph = new ListGraph<>();
-        DijkstraPathFinder<City> lowestWeightFinder = new DijkstraPathFinder<>();
+        ListGraph<CityClass> testGraph = new ListGraph<>();
+        DijkstraPathFinder<CityClass> lowestWeightFinder = new DijkstraPathFinder<>();
 
         // 1. Skapa städer
-        City A = new City("A");
-        City B = new City("B");
-        City C = new City("C");
-        City D = new City("D");
-        City E = new City("E");
-        City F = new City("F");
-        City G = new City("G");
+        CityClass A = new CityClass("A");
+        CityClass B = new CityClass("B");
+        CityClass C = new CityClass("C");
+        CityClass D = new CityClass("D");
+        CityClass E = new CityClass("E");
+        CityClass F = new CityClass("F");
+        CityClass G = new CityClass("G");
 
         testGraph.add(A);
         testGraph.add(B);
@@ -147,7 +147,7 @@ public class PathFinderTest {
 
         // System.out.println("\nVÄGEN MED LÄGST VIKT: ");
 
-        Path<City> testResult = lowestWeightFinder.findPath(testGraph, A, C);
+        Path<CityClass> testResult = lowestWeightFinder.findPath(testGraph, A, C);
         System.out.println("Till C: " + testResult.getTotalWeight());
         testResult = lowestWeightFinder.findPath(testGraph, A, E);
         System.out.println("Till E: " + testResult.getTotalWeight());
