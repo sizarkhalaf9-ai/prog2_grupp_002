@@ -1,17 +1,17 @@
 package se.su.inlupp;
 
-public class CityClass {
+public class City {
   private String name;
   private double x;
   private double y;
 
-  public CityClass(String name, double x, double y) {
+  public City(String name, double x, double y) {
     this.name = name;
     this.x = x;
     this.y = y;
   }
 
-  public CityClass(String name) {
+  public City(String name) {
     this.name = name;
   }
 
@@ -23,11 +23,21 @@ public class CityClass {
     return this.x;
   }
 
-  public double getY() {}
+  public double getY() {
+    return this.y;
+  }
+
+    public void setX(double x) {
+    this.x = x;
+  }
+
+  public void setY(double y) {
+    this.y = y;
+  }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof CityClass city) {
+    if (obj instanceof City city) {
       return name.equals(city.name);
     }
     return false;

@@ -12,10 +12,13 @@ public class Destination extends Pane {
 
     private double startX;
     private double startY;
+    private double newX;
+    private double newY;
 
     public Destination(double x, double y) {
         relocate(x - 10, y - 19);
-        
+        newX = x;
+        newY = y;
         ImageView image = new ImageView(new Image(Destination.class.getResourceAsStream("/nål.png")));
         image.setFitHeight(20);
         image.setFitWidth(20);
@@ -27,10 +30,18 @@ public class Destination extends Pane {
         setOnKeyPressed(new KeyHandler());
     }
 
+    public double getX() {
+        return newX;
+    }
+
+    public double getY() {
+        return newY;
+    }
+
     class DragHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
-            double newX = getLayoutX() + event.getX() - startX;
-            double newY = getLayoutY() + event.getY() - startY;
+            newX = getLayoutX() + event.getX() - startX;
+            newY = getLayoutY() + event.getY() - startY;
             setCursor(Cursor.CLOSED_HAND);
             relocate(newX, newY);
         }

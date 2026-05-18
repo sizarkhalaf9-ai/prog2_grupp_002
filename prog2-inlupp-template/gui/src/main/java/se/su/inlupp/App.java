@@ -65,6 +65,7 @@ public class App extends Application {
     private double newNodeY;
     private ObservableList<String> obsList = FXCollections.observableArrayList();
     private Graph<City> listGraph = new ListGraph<City>();
+    private Destination needle;
 
     @Override
     public void start(Stage stage) {
@@ -171,13 +172,18 @@ public class App extends Application {
     class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             if(newNodeName.getText().trim().isEmpty()) { 
-                Alert alert = new Alert(AlertType.WARNING, "Du måste ange stad");
-                event.consume();
+                Alert alert = new Alert(AlertType.WARNING, "Du måste ange ett namn på staden");
+                alert.showAndWait();
             } else {
-                listGraph.add(new City(newNodeName.getText(), newNodeX, newNodeY));
+                City city = new City(newNodeName.getText(), needle.getX(), needle.getY());
+                if (listGraph.hasNode(city))
+                    listGraph.remove(city);
+                listGraph.add(city);
                 center.setOnMouseClicked(null);
                 center.setCursor(Cursor.DEFAULT);
                 addNodeButton.setDisable(false);
+                //newNodeName.clear();
+                System.out.println(listGraph.toString() + ", " + city.getX() + ", " + city.getY());
             }
         }
     }
@@ -187,7 +193,7 @@ public class App extends Application {
             newNodeX = event.getX();
             newNodeY = event.getY();
 
-            Destination needle = new Destination(newNodeX, newNodeY);
+            needle = new Destination(newNodeX, newNodeY);
             center.getChildren().add(needle);
             
             hasUnsavedChanges = true;
@@ -296,8 +302,6 @@ public class App extends Application {
             hasUnsavedChanges = false;
         }
     }
-
-    public record City(String name, double x, double y) implements Serializable {}
 
     public static void main( String[] args ) {
         launch(args);
