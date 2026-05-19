@@ -338,13 +338,7 @@ public class App extends Application {
         }
     }
 
-    class AddEdgeHandler implements EventHandler<ActionEvent>{
-        public void handle(Action event){
-            if(selectedCity.size() != 2){
-                showWarning("")
-            }
-        }
-    }
+   
 
     private void redrawCitiesFromGraph() {
         center.getChildren().removeIf(node -> node instanceof Destination);
