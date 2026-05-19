@@ -61,13 +61,10 @@ public class App extends Application {
     private FileChooser fileChooser = new FileChooser();
     private boolean hasUnsavedChanges = false;
 
-    /*private TextField newNodeName = new TextField();
-    private Button saveNewNode = new Button("Spara nod");*/
 
     private double newNodeX;
     private double newNodeY;
 
-    //private Destination pendingNode;
 
     private City selectedCity;
 
@@ -109,24 +106,6 @@ public class App extends Application {
         exit.setOnAction(new CloseWindowHandler());
 
         file.getItems().addAll(neew, open, save, exit);
-
-        /*Menu edit = new Menu("Redigera");
-        Menu add = new Menu("Lägg till");
-        Menu remove = new Menu("Ta bort");
-
-        MenuItem addNode = new MenuItem("Nod");
-        addNode.setOnAction(new AddNodeHandler());
-
-        MenuItem addEdge = new MenuItem("Kant");
-
-        MenuItem removeNode = new MenuItem("Nod");
-        removeNode.setOnAction(new RemoveNodeHandler());
-
-        MenuItem removeEdge = new MenuItem("Kant");
-
-        edit.getItems().addAll(add, remove);
-        add.getItems().addAll(addNode, addEdge);
-        remove.getItems().addAll(removeNode, removeEdge);*/
         
 
         // menyn på högersida
@@ -140,10 +119,6 @@ public class App extends Application {
 
         addNodeButton = new Button("Lägg till stad");
         addNodeButton.setOnAction(new AddNodeHandler());
-
-        //Label newNodeNameLabel = new Label("Ange stadens namn");
-
-        //saveNewNode.setDisable(true);
 
         Button removeNodeButton = new Button("Ta bort markör");
         removeNodeButton.setOnAction(new RemoveNodeHandler());
@@ -181,9 +156,6 @@ public class App extends Application {
         right.getChildren().addAll(
                 editLabel,
                 addNodeButton,
-                /*newNodeNameLabel,
-                newNodeName,
-                saveNewNode,/* */
                 removeNodeButton,
                 openButton,
                 saveButton,
@@ -228,40 +200,6 @@ public class App extends Application {
         }
     }
 
-    /*class SaveNewNodeHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent event) {
-
-            if (newNodeName.getText().trim().isEmpty()) { 
-                Alert alert = new Alert(AlertType.WARNING, "Du måste ange ett namn på staden");
-                alert.showAndWait();
-            } else {
-                City city = new City(newNodeName.getText(), needle.getX(), needle.getY());
-                cityDestinations.put(city, needle);
-
-                if (listGraph.hasNode(city)) {
-                    listGraph.remove(city);
-                    //ta bort tillhörande nål
-                    //Alternativt dialogruta som varnar om att staden redan finns
-                }
-                if (needle != null) {
-                    needle.setOnMouseClicked(mouseEvent -> {
-                        mouseEvent.consume();
-                        selectCity(city);
-                        });
-                listGraph.add(city);
-
-                needle = null;
-                }
-                center.setOnMouseClicked(null);   
-                center.setCursor(Cursor.DEFAULT); 
-                addNodeButton.setDisable(false);
-                newNodeName.clear();
-                hasUnsavedChanges = true;
-
-                System.out.println(listGraph.toString());
-            }
-        }
-    }*/
 
     class PutNodeHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
@@ -269,16 +207,6 @@ public class App extends Application {
             newNodeY = event.getY();
 
             needle = new Destination(newNodeX, newNodeY);
-            /*if (newNodeName.getText().trim().isEmpty()) {
-                Alert alert = new Alert(AlertType.ERROR, "Du måste ange ett namn på staden.");
-                alert.showAndWait();
-            } else {
-                center.getChildren().add(needle);
-            }
-
-            hasUnsavedChanges = true;
-            saveNewNode.setDisable(false);
-            saveNewNode.setOnAction(new SaveNewNodeHandler());*/
 
             
         }
@@ -286,13 +214,6 @@ public class App extends Application {
 
     class AddNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
-
-
-            /*PutNodeHandler putNodeHandler = new PutNodeHandler();
-
-            center.setOnMouseClicked(putNodeHandler);
-            center.setCursor(Cursor.CROSSHAIR);
-            addNodeButton.setDisable(true);*/
 
 
             //Skapar en dialogruta
