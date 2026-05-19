@@ -16,9 +16,10 @@ public class Destination extends Pane {
     private double newY;
 
     public Destination(double x, double y) {
-        relocate(x - 10, y - 19);
         newX = x;
         newY = y;
+        relocate(newX, newY);
+
         ImageView image = new ImageView(new Image(Destination.class.getResourceAsStream("/nål.png")));
         image.setFitHeight(20);
         image.setFitWidth(20);

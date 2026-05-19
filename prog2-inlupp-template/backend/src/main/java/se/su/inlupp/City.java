@@ -50,7 +50,7 @@ public class City {
 
   @Override
   public String toString() {
-    return this.name;
+    return this.name + ": x " + this.x + ", y " + this.y;
   }
 }
 

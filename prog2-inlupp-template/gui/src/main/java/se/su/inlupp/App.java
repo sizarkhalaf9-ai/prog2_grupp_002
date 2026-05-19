@@ -182,8 +182,8 @@ public class App extends Application {
                 center.setOnMouseClicked(null);
                 center.setCursor(Cursor.DEFAULT);
                 addNodeButton.setDisable(false);
-                //newNodeName.clear();
-                System.out.println(listGraph.toString() + ", " + city.getX() + ", " + city.getY());
+                newNodeName.clear();
+                System.out.println(listGraph.toString());
             }
         }
     }
