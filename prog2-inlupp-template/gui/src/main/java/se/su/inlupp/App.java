@@ -227,7 +227,7 @@ public class App extends Application {
 
     class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
-            if(newNodeName.getText().trim().isEmpty()) { 
+            if (newNodeName.getText().trim().isEmpty()) { 
                 Alert alert = new Alert(AlertType.WARNING, "Du måste ange ett namn på staden");
                 alert.showAndWait();
             } else {
@@ -265,7 +265,12 @@ public class App extends Application {
             newNodeY = event.getY();
 
             needle = new Destination(newNodeX, newNodeY);
-            center.getChildren().add(needle);
+            if (newNodeName.getText().trim().isEmpty()) {
+                Alert alert = new Alert(AlertType.ERROR, "Du måste ange ett namn på staden.");
+                alert.showAndWait();
+            } else {
+                center.getChildren().add(needle);
+            }
 
             hasUnsavedChanges = true;
             saveNewNode.setDisable(false);
