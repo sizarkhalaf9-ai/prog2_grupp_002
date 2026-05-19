@@ -94,7 +94,7 @@ public class App extends Application {
         exit.setOnAction(new CloseWindowHandler());
         file.getItems().addAll(neew, open, save, exit);
 
-        Menu edit = new Menu("Redigera");
+        /*Menu edit = new Menu("Redigera");
         Menu add = new Menu("Lägg till");
         Menu remove = new Menu("Ta bort");
         MenuItem addNode = new MenuItem("Nod");
@@ -103,9 +103,9 @@ public class App extends Application {
         MenuItem removeEdge = new MenuItem("Kant");
         edit.getItems().addAll(add, remove);
         add.getItems().addAll(addNode, addEdge);
-        remove.getItems().addAll(removeNode, removeEdge);
+        remove.getItems().addAll(removeNode, removeEdge);*/
         
-        MenuBar top = new MenuBar(file, edit);
+        MenuBar top = new MenuBar(file);
         root.setTop(top);
 
         VBox right = new VBox(10);
@@ -176,8 +176,9 @@ public class App extends Application {
                 alert.showAndWait();
             } else {
                 City city = new City(newNodeName.getText(), needle.getX(), needle.getY());
-                if (listGraph.hasNode(city))
+                if (listGraph.hasNode(city)) {
                     listGraph.remove(city);
+                }
                 listGraph.add(city);
                 center.setOnMouseClicked(null);
                 center.setCursor(Cursor.DEFAULT);
