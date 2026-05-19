@@ -47,6 +47,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.shape.Line;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import javafx.scene.control.Dialog;
 
 public class App extends Application {
 
@@ -57,7 +63,7 @@ public class App extends Application {
 
     private Button addNodeButton;
     private Button saveButton;
-    private Button  addEdgeButton;
+    private Button addEdgeButton;
 
     private FileChooser fileChooser = new FileChooser();
     private boolean hasUnsavedChanges = false;
@@ -68,9 +74,14 @@ public class App extends Application {
     private double newNodeX;
     private double newNodeY;
 
-    //private Destination pendingNode;
+    private Destination pendingNode;
+
+    private TravelPlannerModel model = new TravelPlannerModel();
 
     private City selectedCity;
+
+    private final Map<String, Line> edgeLines = new HashMap<>();
+    private final List<City> selectedCities = new ArrayList<>();
 
     private Map<City, Destination> cityDestinations = new HashMap<>();
 
@@ -85,6 +96,11 @@ public class App extends Application {
         BorderPane root = new BorderPane();
 
         center = new Pane();
+
+        center.setPickOnBounds(true);
+
+        mapImage.setMouseTransparent(true);
+
         root.setCenter(center);
 
         ImageView image = new ImageView(new Image(App.class.getResourceAsStream("/sverigekarta2.jpg")));
@@ -97,6 +113,15 @@ public class App extends Application {
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
         open.setOnAction(openHandler);
+
+        MenuItem addEdge = new MenuItem("Kant");
+        addEdge.setOnAction(new AddEdgeHandler());
+
+        MenuItem removeEdge = new MenuItem("Kant");
+        removeEdge.setOnAction(new RemoveEdgeHandler());
+
+        addMenu.getItems().addAll(addNode, addEdge);
+        removeMenu.getItems().addAll(removeNode, removeEdge);
 
         Menu save = new Menu("Spara...");
         MenuItem saveGraph = new MenuItem("Projekt");
@@ -111,24 +136,26 @@ public class App extends Application {
 
         file.getItems().addAll(neew, open, save, exit);
 
-        /*Menu edit = new Menu("Redigera");
-        Menu add = new Menu("Lägg till");
-        Menu remove = new Menu("Ta bort");
+        /*
+         * Menu edit = new Menu("Redigera");
+         * Menu add = new Menu("Lägg till");
+         * Menu remove = new Menu("Ta bort");
+         * 
+         * MenuItem addNode = new MenuItem("Nod");
+         * addNode.setOnAction(new AddNodeHandler());
+         * 
+         * MenuItem addEdge = new MenuItem("Kant");
+         * 
+         * MenuItem removeNode = new MenuItem("Nod");
+         * removeNode.setOnAction(new RemoveNodeHandler());
+         * 
+         * MenuItem removeEdge = new MenuItem("Kant");
+         * 
+         * edit.getItems().addAll(add, remove);
+         * add.getItems().addAll(addNode, addEdge);
+         * remove.getItems().addAll(removeNode, removeEdge);
+         */
 
-        MenuItem addNode = new MenuItem("Nod");
-        addNode.setOnAction(new AddNodeHandler());
-
-        MenuItem addEdge = new MenuItem("Kant");
-
-        MenuItem removeNode = new MenuItem("Nod");
-        removeNode.setOnAction(new RemoveNodeHandler());
-
-        MenuItem removeEdge = new MenuItem("Kant");
-
-        edit.getItems().addAll(add, remove);
-        add.getItems().addAll(addNode, addEdge);
-        remove.getItems().addAll(removeNode, removeEdge);*/
-        
         MenuBar top = new MenuBar(file);
         root.setTop(top);
 
@@ -161,7 +188,8 @@ public class App extends Application {
                 removeNodeButton,
                 openButton,
                 saveButton,
-                exitButton);
+                exitButton,
+                addEdgeButton);
 
         for (Button button : rightButtons) {
             button.setPrefWidth(110);
@@ -187,7 +215,8 @@ public class App extends Application {
                 openButton,
                 saveButton,
                 exitButton,
-                algorithmButton);
+                algorithmButton,
+                addEdgeButton);
 
         right.setAlignment(Pos.TOP_CENTER);
         right.setPadding(femPx);
@@ -229,7 +258,7 @@ public class App extends Application {
 
     class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
-            if(newNodeName.getText().trim().isEmpty()) { 
+            if (newNodeName.getText().trim().isEmpty()) {
                 Alert alert = new Alert(AlertType.WARNING, "Du måste ange ett namn på staden");
                 alert.showAndWait();
             } else {
@@ -238,17 +267,20 @@ public class App extends Application {
 
                 if (listGraph.hasNode(city)) {
                     listGraph.remove(city);
-                    //ta bort tillhörande nål
-                    //Alternativt dialogruta som varnar om att staden redan finns
+                    // ta bort tillhörande nål
+                    // Alternativt dialogruta som varnar om att staden redan finns
                 }
                 if (needle != null) {
                     needle.setOnMouseClicked(mouseEvent -> {
                         mouseEvent.consume();
                         selectCity(city);
-                        });
-                listGraph.add(city);
+                    });
+                    listGraph.add(city);
 
-                needle = null;
+                    cityDestinations.put(city, pendingNode);
+                    attachDestinationHandlers(city, pendingNode);
+
+                    needle = null;
                 }
                 center.setOnMouseClicked(null);
                 center.setCursor(Cursor.DEFAULT);
@@ -397,6 +429,85 @@ public class App extends Application {
         }
     }
 
+    class AddEdgeHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            if (selectedCities.size() != 2) {
+                showWarning("Välj två städer", "Markera exakt två städer innan du skapar en kant.");
+                return;
+            }
+
+            City from = selectedCities.get(0);
+            City to = selectedCities.get(1);
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Lägg till kant");
+            dialog.setHeaderText("Skapa resväg mellan " + from.getName() + " och " + to.getName());
+
+            TextField routeNameField = new TextField();
+            routeNameField.setPromptText("Exempel: Tåg");
+
+            TextField weightField = new TextField();
+            weightField.setPromptText("Exempel: 45");
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(10));
+
+            grid.add(new Label("Namn:"), 0, 0);
+            grid.add(routeNameField, 1, 0);
+            grid.add(new Label("Vikt/minuter:"), 0, 1);
+            grid.add(weightField, 1, 1);
+
+            dialog.getDialogPane().setContent(grid);
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+
+            okButton.addEventFilter(ActionEvent.ACTION, actionEvent -> {
+                String routeName = routeNameField.getText().trim();
+                String weightText = weightField.getText().trim();
+
+                if (routeName.isEmpty()) {
+                    showWarning("Ogiltigt namn", "Kantens namn får inte vara tomt.");
+                    actionEvent.consume();
+                    return;
+                }
+
+                int weight;
+
+                try {
+                    weight = Integer.parseInt(weightText);
+                } catch (NumberFormatException e) {
+                    showWarning("Ogiltig vikt", "Vikten måste vara ett heltal.");
+                    actionEvent.consume();
+                    return;
+                }
+
+                if (weight < 0) {
+                    showWarning("Ogiltig vikt", "Vikten får inte vara negativ.");
+                    actionEvent.consume();
+                    return;
+                }
+
+                try {
+                    model.addRoute(from, to, routeName, weight);
+                    drawEdge(from, to);
+                    clearSelection();
+                    hasUnsavedChanges = true;
+                } catch (IllegalStateException e) {
+                    showWarning("Kanten finns redan", "Det finns redan en kant mellan de valda städerna.");
+                    actionEvent.consume();
+                } catch (RuntimeException e) {
+                    showError("Kanten kunde inte skapas", e.getMessage());
+                    actionEvent.consume();
+                }
+            });
+
+            dialog.showAndWait();
+        }
+    }
+
     class SaveImageHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             try {
@@ -454,7 +565,7 @@ public class App extends Application {
         }
     }
 
-    public static void main( String[] args ) {
+    public static void main(String[] args) {
         launch(args);
     }
 }
