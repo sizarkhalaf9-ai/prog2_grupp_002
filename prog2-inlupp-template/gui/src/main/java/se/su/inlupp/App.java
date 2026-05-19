@@ -76,7 +76,6 @@ public class App extends Application {
 
     private ObservableList<String> obsList = FXCollections.observableArrayList();
     private Graph<City> listGraph = new ListGraph<City>();
-    private Graph<City> Line = new ListGraph<City>();
     private Destination needle;
 
     @Override
