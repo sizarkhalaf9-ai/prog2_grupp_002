@@ -227,6 +227,9 @@ public class App extends Application {
 
     class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
+
+            //System.out.println("SaveNewNodeHandler körs"); //bara test!!
+
             if (newNodeName.getText().trim().isEmpty()) { 
                 Alert alert = new Alert(AlertType.WARNING, "Du måste ange ett namn på staden");
                 alert.showAndWait();
@@ -248,9 +251,12 @@ public class App extends Application {
 
                 needle = null;
                 }
-                center.setOnMouseClicked(null);
-                center.setCursor(Cursor.DEFAULT);
+                center.setOnMouseClicked(null);   //null
+                //System.out.println(center.getOnMouseClicked()); //bara test!!
+                center.setCursor(Cursor.DEFAULT); //DEFAULT
+                //System.out.println(center.getCursor()); //bara test!!
                 addNodeButton.setDisable(false);
+                //System.out.println(addNodeButton.isDisabled()); // bara test!!
                 newNodeName.clear();
                 hasUnsavedChanges = true;
 
@@ -264,6 +270,8 @@ public class App extends Application {
             newNodeX = event.getX();
             newNodeY = event.getY();
 
+            // System.out.println("PutNodeHandler körs"); // bara test!!
+
             needle = new Destination(newNodeX, newNodeY);
             if (newNodeName.getText().trim().isEmpty()) {
                 Alert alert = new Alert(AlertType.ERROR, "Du måste ange ett namn på staden.");
@@ -275,11 +283,16 @@ public class App extends Application {
             hasUnsavedChanges = true;
             saveNewNode.setDisable(false);
             saveNewNode.setOnAction(new SaveNewNodeHandler());
+
+            //System.out.println(center.getOnMouseClicked()); // bara test!!
         }
     }
 
     class AddNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
+
+            // System.out.println("AddNodeHandler körs"); // bara test!!
+
             PutNodeHandler putNodeHandler = new PutNodeHandler();
 
             center.setOnMouseClicked(putNodeHandler);
