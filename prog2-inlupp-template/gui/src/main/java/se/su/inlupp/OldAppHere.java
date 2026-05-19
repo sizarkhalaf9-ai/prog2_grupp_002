@@ -35,7 +35,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -48,7 +47,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class App extends Application {
+public class OldAppHere extends Application {
 
     private Stage stage;
     private Pane center;
@@ -61,8 +60,8 @@ public class App extends Application {
     private FileChooser fileChooser = new FileChooser();
     private boolean hasUnsavedChanges = false;
 
-    /*private TextField newNodeName = new TextField();
-    private Button saveNewNode = new Button("Spara nod");*/
+    private TextField newNodeName = new TextField();
+    private Button saveNewNode = new Button("Spara nod");
 
     private double newNodeX;
     private double newNodeY;
@@ -141,11 +140,11 @@ public class App extends Application {
         addNodeButton = new Button("Lägg till stad");
         addNodeButton.setOnAction(new AddNodeHandler());
 
-        //Label newNodeNameLabel = new Label("Ange stadens namn");
+        Label newNodeNameLabel = new Label("Ange stadens namn");
 
-        //saveNewNode.setDisable(true);
+        saveNewNode.setDisable(true);
 
-        Button removeNodeButton = new Button("Ta bort markör");
+        Button removeNodeButton = new Button("Ta bort nod");
         removeNodeButton.setOnAction(new RemoveNodeHandler());
 
         Button openButton = new Button("Öppna");
@@ -181,9 +180,9 @@ public class App extends Application {
         right.getChildren().addAll(
                 editLabel,
                 addNodeButton,
-                /*newNodeNameLabel,
+                newNodeNameLabel,
                 newNodeName,
-                saveNewNode,/* */
+                saveNewNode,
                 removeNodeButton,
                 openButton,
                 saveButton,
@@ -228,8 +227,10 @@ public class App extends Application {
         }
     }
 
-    /*class SaveNewNodeHandler implements EventHandler<ActionEvent> {
+    class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
+
+            //System.out.println("SaveNewNodeHandler körs"); //bara test!!
 
             if (newNodeName.getText().trim().isEmpty()) { 
                 Alert alert = new Alert(AlertType.WARNING, "Du måste ange ett namn på staden");
@@ -252,24 +253,29 @@ public class App extends Application {
 
                 needle = null;
                 }
-                center.setOnMouseClicked(null);   
-                center.setCursor(Cursor.DEFAULT); 
+                center.setOnMouseClicked(null);   //null
+                //System.out.println(center.getOnMouseClicked()); //bara test!!
+                center.setCursor(Cursor.DEFAULT); //DEFAULT
+                //System.out.println(center.getCursor()); //bara test!!
                 addNodeButton.setDisable(false);
+                //System.out.println(addNodeButton.isDisabled()); // bara test!!
                 newNodeName.clear();
                 hasUnsavedChanges = true;
 
                 System.out.println(listGraph.toString());
             }
         }
-    }*/
+    }
 
     class PutNodeHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
             newNodeX = event.getX();
             newNodeY = event.getY();
 
+            // System.out.println("PutNodeHandler körs"); // bara test!!
+
             needle = new Destination(newNodeX, newNodeY);
-            /*if (newNodeName.getText().trim().isEmpty()) {
+            if (newNodeName.getText().trim().isEmpty()) {
                 Alert alert = new Alert(AlertType.ERROR, "Du måste ange ett namn på staden.");
                 alert.showAndWait();
             } else {
@@ -278,81 +284,22 @@ public class App extends Application {
 
             hasUnsavedChanges = true;
             saveNewNode.setDisable(false);
-            saveNewNode.setOnAction(new SaveNewNodeHandler());*/
+            saveNewNode.setOnAction(new SaveNewNodeHandler());
 
-            
+            //System.out.println(center.getOnMouseClicked()); // bara test!!
         }
     }
 
     class AddNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
 
+            // System.out.println("AddNodeHandler körs"); // bara test!!
 
-            /*PutNodeHandler putNodeHandler = new PutNodeHandler();
+            PutNodeHandler putNodeHandler = new PutNodeHandler();
 
             center.setOnMouseClicked(putNodeHandler);
             center.setCursor(Cursor.CROSSHAIR);
-            addNodeButton.setDisable(true);*/
-
-
-            //Skapar en dialogruta
-            TextInputDialog dialog = new TextInputDialog();
-
-            dialog.setTitle("Lägg till stad");
-            dialog.setHeaderText("Ange namnet på staden");
-
-            // systemt väntar till användaren svarar Ok för "ja"
-            // samt Cancel för "nej"
-            Optional<String> result = dialog.showAndWait();
-
-            // kontroll som kontrollerar om användaren skrev in något
-            if(result.isPresent()) {
-                String cityName = result.get().trim();
-
-                // om inget anges då dycker ett felmeddelande upp
-                if(cityName.isEmpty()) {
-
-                    Alert alert = new Alert(AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("Inget namn har angivits");
-                    alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
-
-                    alert.showAndWait();
-
-                } else {
-                    center.setCursor(Cursor.CROSSHAIR);
-                    center.setOnMouseClicked(mouseEvent -> {
-                        double x = mouseEvent.getX();
-                        double y = mouseEvent.getY();
-
-                        City city = new City(cityName, x, y);
-                        Destination destination = new Destination(x, y);
-
-                        cityDestinations.put(city, destination);
-
-                        if(listGraph.hasNode(city)) {
-                            listGraph.remove(city);
-                        }
-
-                        destination.setOnMouseClicked(mouseEvent2 -> {
-                            mouseEvent2.consume();
-                            selectCity(city);
-                        });
-
-                        listGraph.add(city);
-
-                        center.getChildren().add(destination);
-
-                        hasUnsavedChanges = true;
-
-                        center.setOnMouseClicked(null);
-                        center.setCursor(Cursor.DEFAULT);
-
-                        System.out.println(listGraph);
-                    });
-                }
-            }
-
+            addNodeButton.setDisable(true);
         }
     }
 
