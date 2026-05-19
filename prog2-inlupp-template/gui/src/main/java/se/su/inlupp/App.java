@@ -46,6 +46,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.scene.shape.Line;
 
 public class App extends Application {
 
@@ -56,6 +57,7 @@ public class App extends Application {
 
     private Button addNodeButton;
     private Button saveButton;
+    private Button  addEdgeButton;
 
     private FileChooser fileChooser = new FileChooser();
     private boolean hasUnsavedChanges = false;
@@ -74,6 +76,7 @@ public class App extends Application {
 
     private ObservableList<String> obsList = FXCollections.observableArrayList();
     private Graph<City> listGraph = new ListGraph<City>();
+    private Graph<City> Line = new ListGraph<City>();
     private Destination needle;
 
     @Override
