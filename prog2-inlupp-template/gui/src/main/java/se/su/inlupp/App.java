@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,6 @@ public class App extends Application {
     private String font = "-fx-font: 12px 'Verdana';";
 
     private Button addNodeButton;
-    private Button saveButton;
 
     private FileChooser fileChooser = new FileChooser();
     private boolean hasUnsavedChanges = false;
@@ -65,8 +63,6 @@ public class App extends Application {
 
     private double newNodeX;
     private double newNodeY;
-
-    //private Destination pendingNode;
 
     private City selectedCity;
 
@@ -83,19 +79,17 @@ public class App extends Application {
         BorderPane root = new BorderPane();
 
         center = new Pane();
+        ImageView image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
+        center.getChildren().add(image);        
         root.setCenter(center);
-
-        ImageView image = new ImageView(new Image(App.class.getResourceAsStream("/sverigekarta2.jpg")));
-        center.getChildren().add(image);
-
+        
         Menu file = new Menu("Arkiv");
-
-        MenuItem neew = new MenuItem("Ny");
-
+        MenuItem newMap = new MenuItem("Ny");
+        //newMap.setOnAction(new NewHandler());
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
         open.setOnAction(openHandler);
-
+ 
         Menu save = new Menu("Spara...");
         MenuItem saveGraph = new MenuItem("Projekt");
         MenuItem saveImage = new MenuItem("Bild");
@@ -107,29 +101,17 @@ public class App extends Application {
         MenuItem exit = new MenuItem("Avsluta");
         exit.setOnAction(new CloseWindowHandler());
 
-        file.getItems().addAll(neew, open, save, exit);
-
-        /*Menu edit = new Menu("Redigera");
-        Menu add = new Menu("Lägg till");
-        Menu remove = new Menu("Ta bort");
-
-        MenuItem addNode = new MenuItem("Nod");
-        addNode.setOnAction(new AddNodeHandler());
-
-        MenuItem addEdge = new MenuItem("Kant");
-
-        MenuItem removeNode = new MenuItem("Nod");
-        removeNode.setOnAction(new RemoveNodeHandler());
-
-        MenuItem removeEdge = new MenuItem("Kant");
-
-        edit.getItems().addAll(add, remove);
-        add.getItems().addAll(addNode, addEdge);
-        remove.getItems().addAll(removeNode, removeEdge);*/
+        file.getItems().addAll(newMap, open, save, exit);
         
         MenuBar top = new MenuBar(file);
         root.setTop(top);
-
+        
+        /*image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
+        center.getChildren().add(image);*/
+        
+                
+        
+        
         VBox right = new VBox(10);
 
         Label editLabel = new Label("Redigera");
@@ -145,21 +127,9 @@ public class App extends Application {
         Button removeNodeButton = new Button("Ta bort nod");
         removeNodeButton.setOnAction(new RemoveNodeHandler());
 
-        Button openButton = new Button("Öppna");
-        openButton.setOnAction(openHandler);
-
-        saveButton = new Button("Spara karta");
-        saveButton.setOnAction(new SaveImageHandler());
-
-        Button exitButton = new Button("Avsluta");
-        exitButton.setOnAction(new CloseWindowHandler());
-
         List<Button> rightButtons = List.of(
                 addNodeButton,
-                removeNodeButton,
-                openButton,
-                saveButton,
-                exitButton);
+                removeNodeButton);
 
         for (Button button : rightButtons) {
             button.setPrefWidth(110);
@@ -182,9 +152,6 @@ public class App extends Application {
                 newNodeName,
                 saveNewNode,
                 removeNodeButton,
-                openButton,
-                saveButton,
-                exitButton,
                 algorithmButton);
 
         right.setAlignment(Pos.TOP_CENTER);
@@ -193,8 +160,10 @@ public class App extends Application {
 
         root.setRight(right);
 
-        Scene scene = new Scene(root);
 
+
+
+        Scene scene = new Scene(root);
         stage.setTitle("Reseplanerare");
         stage.setScene(scene);
         stage.setOnCloseRequest(new ExitHandler());
