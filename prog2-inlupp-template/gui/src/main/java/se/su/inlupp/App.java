@@ -66,7 +66,7 @@ public class App extends Application {
     private double newNodeX;
     private double newNodeY;
 
-    private Destination pendingNode;
+    //private Destination pendingNode;
 
     private City selectedCity;
 
@@ -232,39 +232,30 @@ public class App extends Application {
                 alert.showAndWait();
             } else {
                 City city = new City(newNodeName.getText(), needle.getX(), needle.getY());
+                cityDestinations.put(city, needle);
+
                 if (listGraph.hasNode(city)) {
                     listGraph.remove(city);
+                    //ta bort tillhörande nål
+                    //Alternativt dialogruta som varnar om att staden redan finns
                 }
+                if (needle != null) {
+                    needle.setOnMouseClicked(mouseEvent -> {
+                        mouseEvent.consume();
+                        selectCity(city);
+                        });
                 listGraph.add(city);
+
+                needle = null;
+                }
                 center.setOnMouseClicked(null);
                 center.setCursor(Cursor.DEFAULT);
                 addNodeButton.setDisable(false);
                 newNodeName.clear();
+                hasUnsavedChanges = true;
+
                 System.out.println(listGraph.toString());
             }
-
-            City city = new City(cityName, newNodeX, newNodeY);
-            listGraph.add(city);
-
-            if (pendingNode != null) {
-                pendingNode.setOnMouseClicked(mouseEvent -> {
-                    mouseEvent.consume();
-                    selectCity(city);
-                });
-
-                cityDestinations.put(city, pendingNode);
-
-                pendingNode = null;
-            }
-
-            newNodeName.clear();
-            saveNewNode.setDisable(true);
-
-            center.setOnMouseClicked(null);
-            center.setCursor(Cursor.DEFAULT);
-            addNodeButton.setDisable(false);
-
-            hasUnsavedChanges = true;
         }
     }
 
@@ -275,8 +266,6 @@ public class App extends Application {
 
             needle = new Destination(newNodeX, newNodeY);
             center.getChildren().add(needle);
-
-            pendingNode = needle;
 
             hasUnsavedChanges = true;
             saveNewNode.setDisable(false);
