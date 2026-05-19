@@ -351,7 +351,7 @@ public class App extends Application {
         selectedCity = null;
 
         for (City city : listGraph.getNodes()) {
-            Destination destination = new Destination(city.x(), city.y());
+            Destination destination = new Destination(city.getX(), city.getY());
 
             destination.setOnMouseClicked(mouseEvent -> {
                 mouseEvent.consume();
