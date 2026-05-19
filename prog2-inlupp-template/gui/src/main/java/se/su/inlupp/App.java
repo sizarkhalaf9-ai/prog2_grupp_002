@@ -79,13 +79,13 @@ public class App extends Application {
         BorderPane root = new BorderPane();
 
         center = new Pane();
-        ImageView image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
+        ImageView image = new ImageView(new Image(App.class.getResourceAsStream("/maps/empty.png")));
         center.getChildren().add(image);        
         root.setCenter(center);
         
         Menu file = new Menu("Arkiv");
         MenuItem newMap = new MenuItem("Ny");
-        //newMap.setOnAction(new NewHandler());
+        newMap.setOnAction(new NewHandler());
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
         open.setOnAction(openHandler);
@@ -106,8 +106,9 @@ public class App extends Application {
         MenuBar top = new MenuBar(file);
         root.setTop(top);
         
-        /*image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
-        center.getChildren().add(image);*/
+        /*center.getChildren().remove(image);
+        image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
+        center.getChildren().add(image);
         
                 
         
@@ -158,7 +159,7 @@ public class App extends Application {
         right.setPadding(femPx);
         right.setStyle(font);
 
-        root.setRight(right);
+        root.setRight(right);*/
 
 
 
@@ -168,6 +169,13 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setOnCloseRequest(new ExitHandler());
         stage.show();
+    }
+
+    class NewHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            Alert alert = new Alert(Alte);
+
+        }
     }
 
     class CloseWindowHandler implements EventHandler<ActionEvent> {
