@@ -28,6 +28,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -54,6 +55,7 @@ public class App extends Application {
     private Menu save;
     private VBox right;
     private ImageView image;
+    private String imagePath;
     private Insets femPx = new Insets(5);
     private String font = "-fx-font: 12px 'Verdana';";
 
@@ -152,6 +154,16 @@ public class App extends Application {
         stage.show();
     }
 
+    public class NewMapChooser extends Dialog<ButtonType> {
+        public static final ButtonType KARTA1 = new ButtonType("Sverigekarta med angränsande länder");
+        public static final ButtonType KARTA2 = new ButtonType("Sverigekarta utan grannländer");
+        public NewMapChooser() {
+            setTitle("Välj karta");
+            setHeaderText("Välj en karta som du vill jobba med");
+            getDialogPane().getButtonTypes().addAll(KARTA1, KARTA2, ButtonType.CANCEL);
+        }
+    }
+
     class NewMapHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             if (hasUnsavedChanges) {
@@ -173,8 +185,10 @@ public class App extends Application {
 
                 if (mapChoice.get() == NewMapChooser.KARTA1) {
                     image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta2.jpg")));
+                    imagePath = "/maps/sverigekarta2.jpg";
                 } else if (mapChoice.get() == NewMapChooser.KARTA2) {
                     image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
+                    imagePath = "/maps/sverigekarta1.jpg";
                 }
                 center.getChildren().add(image);
                 
@@ -247,7 +261,7 @@ public class App extends Application {
                 return;
             }
             
-            needle = new Destination(event.getX(), event.getY());
+            needle = new Destination(cityName, event.getX(), event.getY());
             center.getChildren().add(needle);
 
             hasUnsavedChanges = true;
@@ -341,7 +355,7 @@ public class App extends Application {
         selectedCity = null;
 
         for (City city : listGraph.getNodes()) {
-            Destination destination = new Destination(city.getX(), city.getY());
+            Destination destination = new Destination(city.getName(), city.getX(), city.getY());
 
             destination.setOnMouseClicked(mouseEvent -> {
                 mouseEvent.consume();
@@ -363,12 +377,12 @@ public class App extends Application {
 
             try {
                 ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName));
+                oos.writeObject(imagePath);
                 oos.writeObject(listGraph);
                 oos.close();
 
                 hasUnsavedChanges = false;
                 save.setDisable(true);
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -412,9 +426,15 @@ public class App extends Application {
 
             try {
                 ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
+                imagePath = (String) inputStream.readObject();
                 listGraph = (Graph<City>) inputStream.readObject();
                 inputStream.close();
 
+                image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
+                center.getChildren().clear();
+                center.getChildren().add(image);
+                root.setRight(right);
+                stage.sizeToScene();
                 redrawCitiesFromGraph();
 
                 obsList.clear();
