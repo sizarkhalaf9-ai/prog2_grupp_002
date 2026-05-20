@@ -474,10 +474,10 @@ public class App extends Application {
                     return;
                 }
 
-                int weight;
+                double weight;
 
                 try {
-                    weight = Integer.parseInt(weightText);
+                    weight = Double.parseDouble(weightText);
                 } catch (NumberFormatException e) {
                     showWarning("Ogiltig vikt", "Vikten måste vara ett heltal.");
                     actionEvent.consume();
