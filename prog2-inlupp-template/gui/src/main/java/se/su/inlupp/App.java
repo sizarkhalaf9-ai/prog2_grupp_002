@@ -469,9 +469,11 @@ public class App extends Application {
                 String weightText = weightField.getText().trim();
 
                 if (routeName.isEmpty()) {
-                    showWarning("Ogiltigt namn", "Kantens namn får inte vara tomt.");
-                    actionEvent.consume();
-                    return;
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Du måste ge ett namn");
+                    alert.setHeaderText("Ingen namn given");
+                    alert.showAndWait();
                 }
 
                 double weight;
@@ -479,15 +481,17 @@ public class App extends Application {
                 try {
                     weight = Double.parseDouble(weightText);
                 } catch (NumberFormatException e) {
-                    showWarning("Ogiltig vikt", "Vikten måste vara ett heltal.");
-                    actionEvent.consume();
-                    return;
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Du måste ange en heltal");
+                    alert.showAndWait();
                 }
 
                 if (weight < 0) {
-                    showWarning("Ogiltig vikt", "Vikten får inte vara negativ.");
-                    actionEvent.consume();
-                    return;
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Vikten är ogiltig eftersom den är negativ");
+                    alert.showAndWait();
                 }
 
                 try {
@@ -496,7 +500,10 @@ public class App extends Application {
                     clearSelection();
                     hasUnsavedChanges = true;
                 } catch (IllegalStateException e) {
-                    showWarning("Kanten finns redan", "Det finns redan en kant mellan de valda städerna.");
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Kanten finns redan, det finns en kant mellan de valda städerna");
+                    alert.showAndWait();
                     actionEvent.consume();
                 } catch (RuntimeException e) {
                     showError("Kanten kunde inte skapas", e.getMessage());
