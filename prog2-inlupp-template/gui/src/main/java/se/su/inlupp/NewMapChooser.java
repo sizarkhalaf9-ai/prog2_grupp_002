@@ -2,20 +2,16 @@ package se.su.inlupp;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.layout.GridPane;
 
 public class NewMapChooser extends Dialog<ButtonType> {
     
-
+    public static final ButtonType KARTA1 = new ButtonType("Sverigekarta med angränsande länder");
+    public static final ButtonType KARTA2 = new ButtonType("Sverigekarta utan grannländer");
 
     public NewMapChooser() {
         setTitle("Välj karta");
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(5);
+        setHeaderText("Välj en karta som du vill jobba med");
         
-
-
-
+        getDialogPane().getButtonTypes().addAll(KARTA1, KARTA2, ButtonType.CANCEL);
     }
 }

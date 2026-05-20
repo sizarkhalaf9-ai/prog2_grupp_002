@@ -14,8 +14,10 @@ public class Destination extends Pane {
     private double startY;
     private double newX;
     private double newY;
+    private String name;
 
-    public Destination(double x, double y) {
+    public Destination(String name, double x, double y) {
+        this.name = name;
         newX = x;
         newY = y;
         relocate(newX - 10, newY - 19);
@@ -29,6 +31,17 @@ public class Destination extends Pane {
         setOnMousePressed(new StartDragHandler());
         setOnMouseDragged(new DragHandler());
         setOnKeyPressed(new KeyHandler());
+    }
+
+    public void lock() {
+        setOnMousePressed(null);
+        setOnMouseDragged(null);
+        setOnKeyPressed(null);
+        setCursor(Cursor.DEFAULT);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public double getX() {
