@@ -57,7 +57,7 @@ public class App extends Application {
     private Button addNodeButton;
     private Button saveButton;
 
-    // NY: edgeknapp som bara ska synas
+    
     private Button addEdgeButton;
 
     private FileChooser fileChooser = new FileChooser();
@@ -89,8 +89,7 @@ public class App extends Application {
 
         center = new Pane();
 
-        // Icke-kompilerbar/experimentell rad från din tidigare kod kan ligga kvar om du
-        // vill testa struktur.
+        
         center.setPickOnBounds(true);
 
         root.setCenter(center);
@@ -264,7 +263,7 @@ public class App extends Application {
                     });
                     listGraph.add(city);
 
-                    // Avsiktligt kvar från experimentell/icke-kompilerbar kod.
+                    
                     cityDestinations.put(city, pendingNode);
                     attachDestinationHandlers(city, pendingNode);
 
