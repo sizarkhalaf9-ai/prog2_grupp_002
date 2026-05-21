@@ -16,6 +16,8 @@ public class Destination extends Pane {
     private double newY;
     private String name;
 
+    private Runnable positionChanged;
+
     public Destination(String name, double x, double y) {
         this.name = name;
         newX = x;
@@ -26,7 +28,7 @@ public class Destination extends Pane {
         image.setFitHeight(20);
         image.setFitWidth(20);
         getChildren().add(image);
-        setPrefSize(20,20);
+        setPrefSize(20, 20);
 
         setOnMousePressed(new StartDragHandler());
         setOnMouseDragged(new DragHandler());
@@ -52,12 +54,24 @@ public class Destination extends Pane {
         return newY;
     }
 
+    public void setOnPositionChanged(Runnable positionChanged) {
+        this.positionChanged = positionChanged;
+    }
+
+    private void notifyPositionChanged() {
+        if (positionChanged != null) {
+            positionChanged.run();
+        }
+    }
+
     class DragHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
             newX = getLayoutX() + event.getX() - startX;
             newY = getLayoutY() + event.getY() - startY;
             setCursor(Cursor.CLOSED_HAND);
             relocate(newX, newY);
+
+            notifyPositionChanged();
         }
     }
 
@@ -74,12 +88,24 @@ public class Destination extends Pane {
             double x = getLayoutX();
             double y = getLayoutY();
             switch (event.getCode()) {
-                case DOWN: y += 1; break;
-                case UP: y -= 1; break; 
-                case RIGHT: x += 1; break; 
-                case LEFT: x -= 1; break; 
+                case DOWN:
+                    y += 1;
+                    break;
+                case UP:
+                    y -= 1;
+                    break;
+                case RIGHT:
+                    x += 1;
+                    break;
+                case LEFT:
+                    x -= 1;
+                    break;
             }
-            event.consume(); //när händelsen har inträffat måste den konsumeras och ersättas av annan händelse
+            event.consume(); // när händelsen har inträffat måste den konsumeras och ersättas av annan
+                             // händelse
+
+            notifyPositionChanged();
+
             relocate(x, y);
         }
     }
