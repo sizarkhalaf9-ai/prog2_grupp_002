@@ -265,7 +265,7 @@ public class App extends Application {
 
                     
                     cityDestinations.put(city, pendingNode);
-                    attachDestinationHandlers(city, pendingNode);
+                   // attachDestinationHandlers(city, pendingNode);
 
                     needle = null;
                 }
