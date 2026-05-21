@@ -15,8 +15,6 @@ import java.util.Optional;
 import javax.imageio.ImageIO;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,6 +41,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -71,18 +70,11 @@ public class App extends Application {
 
     private Button saveNewNode = new Button("Spara nod");
 
-    private double newNodeX;
-    private double newNodeY;
-
-    private Destination pendingNode;
-
-    private TravelPlannerModel model = new TravelPlannerModel();
-
     private City selectedCity;
+    private City firstEdgeCity;
+    private boolean choosingSecondCityForEdge = false;
 
     private Map<City, Destination> cityDestinations = new HashMap<>();
-
-    private ObservableList<String> obsList = FXCollections.observableArrayList();
     private Graph<City> listGraph = new ListGraph<City>();
     private Destination needle;
 
@@ -92,19 +84,22 @@ public class App extends Application {
         root = new BorderPane();
 
         center = new Pane();
-        image = new ImageView(new Image(App.class.getResourceAsStream("/empty.png")));
-        center.getChildren().add(image);
-
         center.setPickOnBounds(true);
+
+        image = new ImageView(new Image(App.class.getResourceAsStream("/empty.png")));
+        image.setMouseTransparent(true);
+        center.getChildren().add(image);
 
         root.setCenter(center);
 
         Menu file = new Menu("Arkiv");
         MenuItem newMap = new MenuItem("Ny");
         newMap.setOnAction(new NewMapHandler());
+
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
         open.setOnAction(openHandler);
+
         save = new Menu("Spara...");
         MenuItem saveGraph = new MenuItem("Projekt");
         MenuItem saveImage = new MenuItem("Bild");
@@ -112,6 +107,7 @@ public class App extends Application {
         save.setDisable(true);
         saveGraph.setOnAction(new SaveHandler());
         saveImage.setOnAction(new SaveImageHandler());
+
         MenuItem exit = new MenuItem("Avsluta");
         exit.setOnAction(new CloseWindowHandler());
         file.getItems().addAll(newMap, open, save, exit);
@@ -130,8 +126,10 @@ public class App extends Application {
         saveNewNode.setDisable(true);
 
         Button removeNodeButton = new Button("Ta bort nod");
+        removeNodeButton.setOnAction(new RemoveNodeHandler());
 
         addEdgeButton = new Button("Lägg till kant");
+        addEdgeButton.setOnAction(new StartAddEdgeHandler());
 
         List<Button> rightButtons = List.of(
                 addNodeButton,
@@ -199,6 +197,10 @@ public class App extends Application {
                 center.getChildren().clear();
                 listGraph = new ListGraph<>();
                 cityDestinations.clear();
+                selectedCity = null;
+                firstEdgeCity = null;
+                choosingSecondCityForEdge = false;
+                needle = null;
                 hasUnsavedChanges = false;
                 save.setDisable(true);
 
@@ -209,6 +211,7 @@ public class App extends Application {
                     image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
                     imagePath = "/maps/sverigekarta1.jpg";
                 }
+                image.setMouseTransparent(true);
                 center.getChildren().add(image);
 
                 root.setRight(right);
@@ -243,22 +246,28 @@ public class App extends Application {
 
     class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
+            if (needle == null) {
+                Alert alert = new Alert(AlertType.WARNING, "Klicka först på kartan där staden ska ligga.");
+                alert.setHeaderText("Ingen plats vald");
+                alert.showAndWait();
+                return;
+            }
+
             City city = new City(cityName, needle.getX(), needle.getY());
 
             if (listGraph.hasNode(city)) {
-                listGraph.remove(city);
+                Alert alert = new Alert(AlertType.WARNING, "Det finns redan en stad med detta namn.");
+                alert.setHeaderText("Staden finns redan");
+                alert.showAndWait();
+                return;
             }
-            if (needle != null) {
-                needle.lock();
-                needle.setOnMouseClicked(mouseEvent -> {
-                    mouseEvent.consume();
-                    selectCity(city);
-                });
-                listGraph.add(city);
-                cityDestinations.put(city, needle);
 
-                needle = null;
-            }
+            needle.lock();
+            attachDestinationHandlers(city, needle);
+            listGraph.add(city);
+            cityDestinations.put(city, needle);
+
+            needle = null;
             center.setOnMouseClicked(null);
             center.setCursor(Cursor.DEFAULT);
             addNodeButton.setDisable(false);
@@ -267,15 +276,11 @@ public class App extends Application {
             saveNewNode.setDisable(true);
 
             System.out.println(listGraph.toString());
-
         }
     }
 
     class PutNodeHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
-            // newNodeX = event.getX();
-            // newNodeY = event.getY();
-
             if (needle != null) {
                 return;
             }
@@ -292,6 +297,9 @@ public class App extends Application {
 
     class AddNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
+            choosingSecondCityForEdge = false;
+            firstEdgeCity = null;
+
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Lägg till stad");
             dialog.setHeaderText("Ange namnet på staden");
@@ -315,86 +323,45 @@ public class App extends Application {
         }
     }
 
-    class AddEdgeHandler {
+    class StartAddEdgeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Lägg till kant");
-            dialog.setHeaderText("Skapa resväg mellan " + from.getName() + " och " + to.getName());
+            if (selectedCity == null) {
+                Alert alert = new Alert(AlertType.WARNING,
+                        "Markera först en stad och tryck sedan på Lägg till kant.");
+                alert.setHeaderText("Ingen stad markerad");
+                alert.showAndWait();
+                return;
+            }
 
-            TextField routeNameField = new TextField();
-            routeNameField.setPromptText("Exempel: Tåg");
+            firstEdgeCity = selectedCity;
+            choosingSecondCityForEdge = true;
 
-            TextField weightField = new TextField();
-            weightField.setPromptText("Exempel: 45");
-
-            GridPane grid = new GridPane();
-            grid.setHgap(10);
-            grid.setVgap(10);
-            grid.setPadding(new Insets(10));
-
-            grid.add(new Label("Namn:"), 0, 0);
-            grid.add(routeNameField, 1, 0);
-            grid.add(new Label("Vikt/minuter:"), 0, 1);
-            grid.add(weightField, 1, 1);
-
-            dialog.getDialogPane().setContent(grid);
-            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-            Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-
-            okButton.addEventFilter(ActionEvent.ACTION, actionEvent -> {
-                String routeName = routeNameField.getText().trim();
-                String weightText = weightField.getText().trim();
-
-                if (routeName.isEmpty()) {
-                    Alert alert = new Alert(
-                            AlertType.WARNING,
-                            "Du måste ge ett namn");
-                    alert.setHeaderText("Ingen namn given");
-                    alert.showAndWait();
-                }
-
-                double weight;
-
-                try {
-                    weight = Double.parseDouble(weightText);
-                } catch (NumberFormatException e) {
-                    Alert alert = new Alert(
-                            AlertType.WARNING,
-                            "Du måste ange en heltal");
-                    alert.showAndWait();
-                }
-
-                if (weight < 0) {
-                    Alert alert = new Alert(
-                            AlertType.WARNING,
-                            "Vikten är ogiltig eftersom den är negativ");
-                    alert.showAndWait();
-                }
-
-                try {
-                    model.addRoute(from, to, routeName, weight);
-                    drawEdge(from, to);
-                    clearSelection();
-                    hasUnsavedChanges = true;
-                } catch (IllegalStateException e) {
-                    Alert alert = new Alert(
-                            AlertType.WARNING,
-                            "Kanten finns redan, det finns en kant mellan de valda städerna");
-                    alert.showAndWait();
-                    actionEvent.consume();
-                } catch (RuntimeException e) {
-                    showError("Kanten kunde inte skapas", e.getMessage());
-                    actionEvent.consume();
-                }
-            });
-
-            dialog.showAndWait();
+            Alert alert = new Alert(AlertType.INFORMATION,
+                    "Klicka på nästa stad som kanten ska gå till.");
+            alert.setHeaderText("Välj nästa stad");
+            alert.showAndWait();
         }
-
     }
 
     private void selectCity(City city) {
+        if (!choosingSecondCityForEdge && selectedCity != null && selectedCity.equals(city)) {
+            Destination destination = cityDestinations.get(selectedCity);
+
+            if (destination != null) {
+                destination.setStyle("");
+            }
+
+            selectedCity = null;
+            firstEdgeCity = null;
+            choosingSecondCityForEdge = false;
+            return;
+        }
+
+        if (choosingSecondCityForEdge) {
+            handleSecondCityForEdge(city);
+            return;
+        }
+
         if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
             cityDestinations.get(selectedCity).setStyle("");
         }
@@ -409,6 +376,104 @@ public class App extends Application {
                             "-fx-border-width: 3; " +
                             "-fx-border-radius: 4;");
         }
+    }
+
+    private void handleSecondCityForEdge(City secondCity) {
+        if (firstEdgeCity == null) {
+            choosingSecondCityForEdge = false;
+            return;
+        }
+
+        if (firstEdgeCity.equals(secondCity)) {
+            Alert alert = new Alert(AlertType.WARNING, "Du måste välja två olika städer.");
+            alert.setHeaderText("Ogiltigt val");
+            alert.showAndWait();
+            return;
+        }
+
+        showEdgeDialog(firstEdgeCity, secondCity);
+        choosingSecondCityForEdge = false;
+        firstEdgeCity = null;
+    }
+
+    private void showEdgeDialog(City from, City to) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Lägg till kant");
+        dialog.setHeaderText("Skapa resväg mellan " + from.getName() + " och " + to.getName());
+
+        TextField routeNameField = new TextField();
+        routeNameField.setPromptText("Exempel: Tåg");
+
+        TextField weightField = new TextField();
+        weightField.setPromptText("Exempel: 45");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10));
+
+        grid.add(new Label("Färdmedel:"), 0, 0);
+        grid.add(routeNameField, 1, 0);
+        grid.add(new Label("Vikt/minuter:"), 0, 1);
+        grid.add(weightField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+
+        okButton.addEventFilter(ActionEvent.ACTION, actionEvent -> {
+            String routeName = routeNameField.getText().trim();
+            String weightText = weightField.getText().trim();
+
+            if (routeName.isEmpty()) {
+                Alert alert = new Alert(AlertType.WARNING, "Du måste ange ett färdmedel.");
+                alert.setHeaderText("Ogiltigt färdmedel");
+                alert.showAndWait();
+                actionEvent.consume();
+                return;
+            }
+
+            int weight;
+            try {
+                weight = Integer.parseInt(weightText);
+            } catch (NumberFormatException e) {
+                Alert alert = new Alert(AlertType.WARNING, "Vikten måste vara ett heltal.");
+                alert.setHeaderText("Ogiltig vikt");
+                alert.showAndWait();
+                actionEvent.consume();
+                return;
+            }
+
+            if (weight < 0) {
+                Alert alert = new Alert(AlertType.WARNING, "Vikten får inte vara negativ.");
+                alert.setHeaderText("Ogiltig vikt");
+                alert.showAndWait();
+                actionEvent.consume();
+                return;
+            }
+
+            try {
+                listGraph.connect(from, to, routeName, weight);
+                redrawEdgesFromGraph();
+                hasUnsavedChanges = true;
+                save.setDisable(false);
+            } catch (IllegalStateException e) {
+                Alert alert = new Alert(AlertType.WARNING,
+                        "Det finns redan en kant mellan de markerade städerna.");
+                alert.setHeaderText("Kanten finns redan");
+                alert.showAndWait();
+                actionEvent.consume();
+            } catch (RuntimeException e) {
+                Alert alert = new Alert(AlertType.ERROR,
+                        "Kanten kunde inte skapas: " + e.getMessage());
+                alert.setHeaderText("Fel vid skapande av kant");
+                alert.showAndWait();
+                actionEvent.consume();
+            }
+        });
+
+        dialog.showAndWait();
     }
 
     class RemoveNodeHandler implements EventHandler<ActionEvent> {
@@ -432,6 +497,9 @@ public class App extends Application {
                 }
 
                 selectedCity = null;
+                firstEdgeCity = null;
+                choosingSecondCityForEdge = false;
+                redrawEdgesFromGraph();
                 hasUnsavedChanges = true;
                 save.setDisable(false);
 
@@ -445,23 +513,73 @@ public class App extends Application {
         }
     }
 
+    private void attachDestinationHandlers(City city, Destination destination) {
+        destination.setOnMouseClicked(mouseEvent -> {
+            mouseEvent.consume();
+            selectCity(city);
+        });
+
+        destination.setOnPositionChanged(() -> {
+            city.setX(destination.getX());
+            city.setY(destination.getY());
+            redrawEdgesFromGraph();
+            hasUnsavedChanges = true;
+            save.setDisable(false);
+        });
+    }
+
+    private void redrawEdgesFromGraph() {
+        center.getChildren().removeIf(node -> node instanceof Line);
+
+        for (City city : listGraph.getNodes()) {
+            for (Edge<City> edge : listGraph.getEdgesFrom(city)) {
+                City destination = edge.getDestination();
+
+                if (city.getName().compareTo(destination.getName()) < 0) {
+                    drawEdge(city, destination);
+                }
+            }
+        }
+    }
+
+    private void drawEdge(City from, City to) {
+        Destination fromDestination = cityDestinations.get(from);
+        Destination toDestination = cityDestinations.get(to);
+
+        if (fromDestination == null || toDestination == null) {
+            return;
+        }
+
+        Line line = new Line(
+                fromDestination.getX(),
+                fromDestination.getY(),
+                toDestination.getX(),
+                toDestination.getY());
+
+        line.setStrokeWidth(3);
+        line.setMouseTransparent(true);
+
+        int index = Math.min(1, center.getChildren().size());
+        center.getChildren().add(index, line);
+    }
+
     private void redrawCitiesFromGraph() {
         center.getChildren().removeIf(node -> node instanceof Destination);
+        center.getChildren().removeIf(node -> node instanceof Line);
 
         cityDestinations.clear();
         selectedCity = null;
+        firstEdgeCity = null;
+        choosingSecondCityForEdge = false;
 
         for (City city : listGraph.getNodes()) {
             Destination destination = new Destination(city.getName(), city.getX(), city.getY());
-
-            destination.setOnMouseClicked(mouseEvent -> {
-                mouseEvent.consume();
-                selectCity(city);
-            });
-
+            attachDestinationHandlers(city, destination);
             cityDestinations.put(city, destination);
             center.getChildren().add(destination);
         }
+
+        redrawEdgesFromGraph();
     }
 
     class SaveHandler implements EventHandler<ActionEvent> {
@@ -528,14 +646,12 @@ public class App extends Application {
                 inputStream.close();
 
                 image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
+                image.setMouseTransparent(true);
                 center.getChildren().clear();
                 center.getChildren().add(image);
                 root.setRight(right);
                 stage.sizeToScene();
                 redrawCitiesFromGraph();
-
-                obsList.clear();
-                obsList.addAll(listGraph.getNodes().toString());
 
                 hasUnsavedChanges = false;
                 save.setDisable(true);
