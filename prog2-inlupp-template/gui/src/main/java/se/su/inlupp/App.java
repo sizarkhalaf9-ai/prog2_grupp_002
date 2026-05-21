@@ -45,7 +45,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import se.su.inlupp.App.RemoveNodeHandler;
 
 public class App extends Application {
 
@@ -130,12 +129,16 @@ public class App extends Application {
         saveNewNode.setDisable(true);
 
         Button removeNodeButton = new Button("Ta bort nod");
-        removeNodeButton.setOnAction(new RemoveNodeHandler());
+        
+        addEdgeButton = new Button("Lägg till kant");
+        addEdgeButton.setOnAction(new RemoveNodeHandler());
+
 
         List<Button> rightButtons = List.of(
                 addNodeButton,
                 saveNewNode,
-                removeNodeButton);
+                removeNodeButton,
+                addEdgeButton);
         for (Button button : rightButtons) {
             button.setPrefWidth(110);
             button.setTextAlignment(TextAlignment.CENTER);
@@ -155,6 +158,7 @@ public class App extends Application {
                 addNodeButton,
                 saveNewNode,
                 removeNodeButton,
+                addEdgeButton,
                 algorithmButton);
 
         right.setAlignment(Pos.TOP_CENTER);
