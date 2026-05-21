@@ -91,13 +91,12 @@ public class App extends Application {
 
         center = new Pane();
         image = new ImageView(new Image(App.class.getResourceAsStream("/empty.png")));
-        center.getChildren().add(image);        
+        center.getChildren().add(image);
 
-        
         center.setPickOnBounds(true);
 
         root.setCenter(center);
-        
+
         Menu file = new Menu("Arkiv");
         MenuItem newMap = new MenuItem("Ny");
         newMap.setOnAction(new NewMapHandler());
@@ -129,10 +128,8 @@ public class App extends Application {
         saveNewNode.setDisable(true);
 
         Button removeNodeButton = new Button("Ta bort nod");
-        
-        addEdgeButton = new Button("Lägg till kant");
-        addEdgeButton.setOnAction(new RemoveNodeHandler());
 
+        addEdgeButton = new Button("Lägg till kant");
 
         List<Button> rightButtons = List.of(
                 addNodeButton,
@@ -244,8 +241,8 @@ public class App extends Application {
 
     class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
-            City city = new City(cityName, needle.getX(), needle.getY());            
-            
+            City city = new City(cityName, needle.getX(), needle.getY());
+
             if (listGraph.hasNode(city)) {
                 listGraph.remove(city);
             }
@@ -254,11 +251,11 @@ public class App extends Application {
                 needle.setOnMouseClicked(mouseEvent -> {
                     mouseEvent.consume();
                     selectCity(city);
-                    });
-            listGraph.add(city);
-            cityDestinations.put(city, needle);
+                });
+                listGraph.add(city);
+                cityDestinations.put(city, needle);
 
-            needle = null;
+                needle = null;
             }
             center.setOnMouseClicked(null);
             center.setCursor(Cursor.DEFAULT);
@@ -268,216 +265,216 @@ public class App extends Application {
             saveNewNode.setDisable(true);
 
             System.out.println(listGraph.toString());
-        
+
         }
     }
 
-        class PutNodeHandler implements EventHandler<MouseEvent> {
-            public void handle(MouseEvent event) {
-                // newNodeX = event.getX();
-                // newNodeY = event.getY();
+    class PutNodeHandler implements EventHandler<MouseEvent> {
+        public void handle(MouseEvent event) {
+            // newNodeX = event.getX();
+            // newNodeY = event.getY();
 
-                if (needle != null) {
-                    return;
+            if (needle != null) {
+                return;
+            }
+
+            needle = new Destination(cityName, event.getX(), event.getY());
+            center.getChildren().add(needle);
+
+            hasUnsavedChanges = true;
+            save.setDisable(false);
+            saveNewNode.setDisable(false);
+            saveNewNode.setOnAction(new SaveNewNodeHandler());
+        }
+    }
+
+    class AddNodeHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Lägg till stad");
+            dialog.setHeaderText("Ange namnet på staden");
+            Optional<String> result = dialog.showAndWait();
+
+            if (result.isPresent()) {
+                cityName = result.get().trim();
+                if (cityName.isEmpty()) {
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Inget namn har angivits");
+                    alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
+                    alert.showAndWait();
+                } else {
+                    putNodeHandler = new PutNodeHandler();
+                    center.setOnMouseClicked(putNodeHandler);
+                    center.setCursor(Cursor.CROSSHAIR);
+                    addNodeButton.setDisable(true);
+                }
+            }
+        }
+    }
+
+    private void selectCity(City city) {
+        if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
+            cityDestinations.get(selectedCity).setStyle("");
+        }
+
+        selectedCity = city;
+
+        Destination destination = cityDestinations.get(city);
+
+        if (destination != null) {
+            destination.setStyle(
+                    "-fx-border-color: red; " +
+                            "-fx-border-width: 3; " +
+                            "-fx-border-radius: 4;");
+        }
+    }
+
+    class RemoveNodeHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            if (selectedCity == null) {
+                Alert alert = new Alert(
+                        AlertType.WARNING,
+                        "Du måste markera en stad innan du kan ta bort den.");
+                alert.setHeaderText("Ingen stad markerad");
+                alert.showAndWait();
+                return;
+            }
+
+            try {
+                listGraph.remove(selectedCity);
+
+                Destination destination = cityDestinations.remove(selectedCity);
+
+                if (destination != null) {
+                    center.getChildren().remove(destination);
                 }
 
-                needle = new Destination(cityName, event.getX(), event.getY());
-                center.getChildren().add(needle);
-
+                selectedCity = null;
                 hasUnsavedChanges = true;
                 save.setDisable(false);
-                saveNewNode.setDisable(false);
-                saveNewNode.setOnAction(new SaveNewNodeHandler());
+
+            } catch (RuntimeException e) {
+                Alert alert = new Alert(
+                        AlertType.ERROR,
+                        "Staden kunde inte tas bort: " + e.getMessage());
+                alert.setHeaderText("Fel vid borttagning");
+                alert.showAndWait();
             }
         }
+    }
 
-        class AddNodeHandler implements EventHandler<ActionEvent> {
-            public void handle(ActionEvent event) {
-                TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("Lägg till stad");
-                dialog.setHeaderText("Ange namnet på staden");
-                Optional<String> result = dialog.showAndWait();
+    private void redrawCitiesFromGraph() {
+        center.getChildren().removeIf(node -> node instanceof Destination);
 
-                if (result.isPresent()) {
-                    cityName = result.get().trim();
-                    if (cityName.isEmpty()) {
-                        Alert alert = new Alert(AlertType.ERROR);
-                        alert.setTitle("Error");
-                        alert.setHeaderText("Inget namn har angivits");
-                        alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
-                        alert.showAndWait();
-                    } else {
-                        putNodeHandler = new PutNodeHandler();
-                        center.setOnMouseClicked(putNodeHandler);
-                        center.setCursor(Cursor.CROSSHAIR);
-                        addNodeButton.setDisable(true);
-                    }
-                }
-            }
+        cityDestinations.clear();
+        selectedCity = null;
+
+        for (City city : listGraph.getNodes()) {
+            Destination destination = new Destination(city.getName(), city.getX(), city.getY());
+
+            destination.setOnMouseClicked(mouseEvent -> {
+                mouseEvent.consume();
+                selectCity(city);
+            });
+
+            cityDestinations.put(city, destination);
+            center.getChildren().add(destination);
         }
+    }
 
-        private void selectCity(City city) {
-            if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
-                cityDestinations.get(selectedCity).setStyle("");
+    class SaveHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            fileChooser.setInitialDirectory(new File("."));
+            File fileName = fileChooser.showSaveDialog(stage);
+            if (fileName == null) {
+                return;
             }
 
-            selectedCity = city;
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName));
+                oos.writeObject(imagePath);
+                oos.writeObject(listGraph);
+                oos.close();
 
-            Destination destination = cityDestinations.get(city);
+                hasUnsavedChanges = false;
+                save.setDisable(true);
 
-            if (destination != null) {
-                destination.setStyle(
-                        "-fx-border-color: red; " +
-                                "-fx-border-width: 3; " +
-                                "-fx-border-radius: 4;");
+            } catch (IOException e) {
+                e.printStackTrace();
+
+                Alert alert = new Alert(AlertType.ERROR, "Projektet kunde inte sparas.");
+                alert.setHeaderText("Fel vid sparning");
+                alert.showAndWait();
             }
         }
+    }
 
-        class RemoveNodeHandler implements EventHandler<ActionEvent> {
-            public void handle(ActionEvent event) {
-                if (selectedCity == null) {
-                    Alert alert = new Alert(
-                            AlertType.WARNING,
-                            "Du måste markera en stad innan du kan ta bort den.");
-                    alert.setHeaderText("Ingen stad markerad");
-                    alert.showAndWait();
-                    return;
-                }
+    class SaveImageHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            try {
+                BufferedImage image = SwingFXUtils.fromFXImage(center.snapshot(null, null), null);
+                ImageIO.write(image, "png", new File("/resources/maps/capture.png"));
 
-                try {
-                    listGraph.remove(selectedCity);
+                Alert alert = new Alert(
+                        Alert.AlertType.INFORMATION,
+                        "En bild av kartan finns nu sparad i rotmappen.");
+                alert.setHeaderText("Sparat!");
+                alert.setTitle("Sparar bild...");
+                alert.show();
 
-                    Destination destination = cityDestinations.remove(selectedCity);
-
-                    if (destination != null) {
-                        center.getChildren().remove(destination);
-                    }
-
-                    selectedCity = null;
-                    hasUnsavedChanges = true;
-                    save.setDisable(false);
-
-                } catch (RuntimeException e) {
-                    Alert alert = new Alert(
-                            AlertType.ERROR,
-                            "Staden kunde inte tas bort: " + e.getMessage());
-                    alert.setHeaderText("Fel vid borttagning");
-                    alert.showAndWait();
-                }
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "IO Error");
+                alert.showAndWait();
             }
         }
+    }
 
-        private void redrawCitiesFromGraph() {
-            center.getChildren().removeIf(node -> node instanceof Destination);
+    class OpenHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            fileChooser.setInitialDirectory(new File("."));
 
-            cityDestinations.clear();
-            selectedCity = null;
+            File fileName = fileChooser.showOpenDialog(stage);
 
-            for (City city : listGraph.getNodes()) {
-                Destination destination = new Destination(city.getName(), city.getX(), city.getY());
+            if (fileName == null) {
+                return;
+            }
 
-                destination.setOnMouseClicked(mouseEvent -> {
-                    mouseEvent.consume();
-                    selectCity(city);
-                });
+            try {
+                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
+                imagePath = (String) inputStream.readObject();
+                listGraph = (Graph<City>) inputStream.readObject();
+                inputStream.close();
 
-                cityDestinations.put(city, destination);
-                center.getChildren().add(destination);
+                image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
+                center.getChildren().clear();
+                center.getChildren().add(image);
+                root.setRight(right);
+                stage.sizeToScene();
+                redrawCitiesFromGraph();
+
+                obsList.clear();
+                obsList.addAll(listGraph.getNodes().toString());
+
+                hasUnsavedChanges = false;
+                save.setDisable(true);
+
+            } catch (IOException e) {
+                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte hittas");
+                alert.showAndWait();
+                e.printStackTrace();
+
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+
+                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte läsas in.");
+                alert.setHeaderText("Fel vid öppning");
+                alert.showAndWait();
             }
         }
+    }
 
-        class SaveHandler implements EventHandler<ActionEvent> {
-            public void handle(ActionEvent event) {
-                fileChooser.setInitialDirectory(new File("."));
-                File fileName = fileChooser.showSaveDialog(stage);
-                if (fileName == null) {
-                    return;
-                }
-
-                try {
-                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName));
-                    oos.writeObject(imagePath);
-                    oos.writeObject(listGraph);
-                    oos.close();
-
-                    hasUnsavedChanges = false;
-                    save.setDisable(true);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                    Alert alert = new Alert(AlertType.ERROR, "Projektet kunde inte sparas.");
-                    alert.setHeaderText("Fel vid sparning");
-                    alert.showAndWait();
-                }
-            }
-        }
-
-        class SaveImageHandler implements EventHandler<ActionEvent> {
-            public void handle(ActionEvent event) {
-                try {
-                    BufferedImage image = SwingFXUtils.fromFXImage(center.snapshot(null, null), null);
-                    ImageIO.write(image, "png", new File("/resources/maps/capture.png"));
-
-                    Alert alert = new Alert(
-                            Alert.AlertType.INFORMATION,
-                            "En bild av kartan finns nu sparad i rotmappen.");
-                    alert.setHeaderText("Sparat!");
-                    alert.setTitle("Sparar bild...");
-                    alert.show();
-
-                } catch (IOException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "IO Error");
-                    alert.showAndWait();
-                }
-            }
-        }
-
-        class OpenHandler implements EventHandler<ActionEvent> {
-            public void handle(ActionEvent event) {
-                fileChooser.setInitialDirectory(new File("."));
-
-                File fileName = fileChooser.showOpenDialog(stage);
-
-                if (fileName == null) {
-                    return;
-                }
-
-                try {
-                    ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
-                    imagePath = (String) inputStream.readObject();
-                    listGraph = (Graph<City>) inputStream.readObject();
-                    inputStream.close();
-
-                    image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
-                    center.getChildren().clear();
-                    center.getChildren().add(image);
-                    root.setRight(right);
-                    stage.sizeToScene();
-                    redrawCitiesFromGraph();
-
-                    obsList.clear();
-                    obsList.addAll(listGraph.getNodes().toString());
-
-                    hasUnsavedChanges = false;
-                    save.setDisable(true);
-
-                } catch (IOException e) {
-                    Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte hittas");
-                    alert.showAndWait();
-                    e.printStackTrace();
-
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-
-                    Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte läsas in.");
-                    alert.setHeaderText("Fel vid öppning");
-                    alert.showAndWait();
-                }
-            }
-        }
-
-        public static void main(String[] args) {
-            launch(args);
-        }
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
