@@ -313,6 +313,12 @@ public class App extends Application {
         }
     }
 
+    class AddEdgeHandler{
+        public void handle (ActionEvent event){
+       
+        }
+    }
+
     private void selectCity(City city) {
         if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
             cityDestinations.get(selectedCity).setStyle("");
