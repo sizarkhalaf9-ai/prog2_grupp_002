@@ -82,7 +82,7 @@ public class App extends Application {
         root = new BorderPane();
 
         center = new Pane();
-        image = new ImageView(new Image(App.class.getResourceAsStream("/startbild.png")));
+        image = new ImageView(new Image(App.class.getResourceAsStream("/empty.png")));
         center.getChildren().add(image);        
         root.setCenter(center);
         
