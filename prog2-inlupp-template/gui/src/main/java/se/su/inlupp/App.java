@@ -34,11 +34,13 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
@@ -313,10 +315,83 @@ public class App extends Application {
         }
     }
 
-    class AddEdgeHandler{
-        public void handle (ActionEvent event){
-       
+    class AddEdgeHandler {
+        public void handle(ActionEvent event) {
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Lägg till kant");
+            dialog.setHeaderText("Skapa resväg mellan " + from.getName() + " och " + to.getName());
+
+            TextField routeNameField = new TextField();
+            routeNameField.setPromptText("Exempel: Tåg");
+
+            TextField weightField = new TextField();
+            weightField.setPromptText("Exempel: 45");
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(10));
+
+            grid.add(new Label("Namn:"), 0, 0);
+            grid.add(routeNameField, 1, 0);
+            grid.add(new Label("Vikt/minuter:"), 0, 1);
+            grid.add(weightField, 1, 1);
+
+            dialog.getDialogPane().setContent(grid);
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+
+            okButton.addEventFilter(ActionEvent.ACTION, actionEvent -> {
+                String routeName = routeNameField.getText().trim();
+                String weightText = weightField.getText().trim();
+
+                if (routeName.isEmpty()) {
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Du måste ge ett namn");
+                    alert.setHeaderText("Ingen namn given");
+                    alert.showAndWait();
+                }
+
+                double weight;
+
+                try {
+                    weight = Double.parseDouble(weightText);
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Du måste ange en heltal");
+                    alert.showAndWait();
+                }
+
+                if (weight < 0) {
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Vikten är ogiltig eftersom den är negativ");
+                    alert.showAndWait();
+                }
+
+                try {
+                    model.addRoute(from, to, routeName, weight);
+                    drawEdge(from, to);
+                    clearSelection();
+                    hasUnsavedChanges = true;
+                } catch (IllegalStateException e) {
+                    Alert alert = new Alert(
+                            AlertType.WARNING,
+                            "Kanten finns redan, det finns en kant mellan de valda städerna");
+                    alert.showAndWait();
+                    actionEvent.consume();
+                } catch (RuntimeException e) {
+                    showError("Kanten kunde inte skapas", e.getMessage());
+                    actionEvent.consume();
+                }
+            });
+
+            dialog.showAndWait();
         }
+
     }
 
     private void selectCity(City city) {
