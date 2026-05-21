@@ -289,28 +289,36 @@ public class App extends Application {
 
         class AddNodeHandler implements EventHandler<ActionEvent> {
             public void handle(ActionEvent event) {
-                TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("Lägg till stad");
-                dialog.setHeaderText("Ange namnet på staden");
-                Optional<String> result = dialog.showAndWait();
+                boolean continueLoop = true;
+                while (continueLoop) {
+                    TextInputDialog dialog = new TextInputDialog();
+                    dialog.setTitle("Lägg till stad");
+                    dialog.setHeaderText("Ange namnet på staden");
+                    Optional<String> result = dialog.showAndWait();
+                    if (result.isPresent()) {
+                        cityName = result.get().trim();
+                        if (cityName.isEmpty()) {
+                            Alert alert = new Alert(AlertType.ERROR);
+                            alert.setTitle("Error");
+                            alert.setHeaderText("Inget namn har angivits");
+                            alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
+                            alert.showAndWait();
+                        } else { 
+                            putNodeHandler = new PutNodeHandler();
+                            center.setOnMouseClicked(putNodeHandler);
+                            center.setCursor(Cursor.CROSSHAIR);
+                            addNodeButton.setDisable(true);
 
-                if (result.isPresent()) {
-                    cityName = result.get().trim();
-                    if (cityName.isEmpty()) {
-                        Alert alert = new Alert(AlertType.ERROR);
-                        alert.setTitle("Error");
-                        alert.setHeaderText("Inget namn har angivits");
-                        alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
-                        alert.showAndWait();
+                            break;
+                        } 
+                        
                     } else {
-                        putNodeHandler = new PutNodeHandler();
-                        center.setOnMouseClicked(putNodeHandler);
-                        center.setCursor(Cursor.CROSSHAIR);
-                        addNodeButton.setDisable(true);
+                        return;
                     }
                 }
             }
         }
+        
 
         private void selectCity(City city) {
             if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
