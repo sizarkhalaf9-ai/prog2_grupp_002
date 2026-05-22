@@ -22,7 +22,6 @@ public class PathFinderTest {
 
         // 2. Koppla samman städerna (Samma logik: Omvägen är billigare)
         swedenGraph.connect(stockholm, örebro, "E18 Direkt", 100);
-        
         swedenGraph.connect(stockholm, uppsala, "E4", 10);
         swedenGraph.connect(uppsala, enköping, "Väg 55", 15);
         swedenGraph.connect(enköping, västerås, "E18", 10);

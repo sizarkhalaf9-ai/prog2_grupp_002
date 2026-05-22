@@ -1,12 +1,17 @@
 package se.su.inlupp;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,8 +78,6 @@ public class App extends Application {
     private double newNodeY;
 
     private Destination pendingNode;
-
-    private TravelPlannerModel model = new TravelPlannerModel();
 
     private City selectedCity;
 
@@ -393,16 +396,16 @@ public class App extends Application {
                 if (fileName == null) {
                     return;
                 }
-
-                try {
-                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName));
-                    oos.writeObject(imagePath);
-                    oos.writeObject(listGraph);
-                    oos.close();
-
+                try { 
+                    PrintWriter writer = new PrintWriter(new FileWriter(fileName));
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(imagePath);
+                    sb.append(String.format("%n"));
+                    sb.append(listGraph.toString());
+                    writer.print(sb);
+                    writer.close();
                     hasUnsavedChanges = false;
                     save.setDisable(true);
-
                 } catch (IOException e) {
                     e.printStackTrace();
 
@@ -438,16 +441,23 @@ public class App extends Application {
                 fileChooser.setInitialDirectory(new File("."));
 
                 File fileName = fileChooser.showOpenDialog(stage);
-
-                if (fileName == null) {
-                    return;
-                }
+                if (fileName == null) return;
 
                 try {
-                    ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
-                    imagePath = (String) inputStream.readObject();
-                    listGraph = (Graph<City>) inputStream.readObject();
-                    inputStream.close();
+                    BufferedReader reader = new BufferedReader(new FileReader(fileName));
+                    imagePath = reader.readLine();
+                    int numberOfNodes = Integer.parseInt(reader.readLine());
+                    for (int i = 0; i < numberOfNodes; i++) {
+                        String[] node = reader.readLine().split(";");
+                        City city = new City(node[0], Double.parseDouble(node[1]), Double.parseDouble(node[2]))
+                        listGraph.add(city);
+                        int numberOfEdges = Integer.parseInt(reader.readLine());
+                        for (int j = 0; j < numberOfEdges; j++) {
+                            String[] edges = reader.readLine().split(";");
+                            listGraph.connect(city, new City(edges[0]), edges[1], Integer.parseInt(edges[2]));
+                        }
+                    }
+                    reader.close();
 
                     image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
                     center.getChildren().clear();
@@ -455,6 +465,7 @@ public class App extends Application {
                     root.setRight(right);
                     stage.sizeToScene();
                     redrawCitiesFromGraph();
+                    //redrawEdgesFromGraph();
 
                     obsList.clear();
                     obsList.addAll(listGraph.getNodes().toString());

@@ -1,6 +1,7 @@
 package se.su.inlupp;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class EdgeClass<T> implements Edge<T>, Serializable {
     private T destination;
@@ -31,9 +32,20 @@ public class EdgeClass<T> implements Edge<T>, Serializable {
         return this.name;
     }
 
-    public String toString() {
-        return "till " + destination.toString() + " med " + name + " tar " + weight;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof EdgeClass edge) {
+            return this.weight == edge.weight && this.name.equals(edge.name) && this.destination.equals(edge.destination);
+        }
+        return false;
     }
 
-    
+    @Override
+    public int hashCode() {
+        return Objects.hash(weight, name, destination);
+    }
+
+    public String toString() {
+        return destination.toString() + "; " + name + "; " + weight;
+    }
 }

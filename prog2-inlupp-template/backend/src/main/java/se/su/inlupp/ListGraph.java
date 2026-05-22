@@ -111,9 +111,9 @@ public class ListGraph<T> implements Graph<T>, Serializable {
     StringBuilder sb = new StringBuilder();
     Set<T> allNodes = getNodes();
     for (T node : allNodes) {
-      sb.append(node.toString() + ", ");
+      sb.append(node.toString() + "; ");
       for (Edge<T> edge : getEdgesFrom(node)) {
-        sb.append(edge.toString() + ", ");
+        sb.append(edge.toString() + ";\n");
       }
     }
     String string = sb.toString();
