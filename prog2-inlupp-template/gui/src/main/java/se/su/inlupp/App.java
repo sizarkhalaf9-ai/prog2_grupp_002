@@ -86,7 +86,7 @@ public class App extends Application {
         center = new Pane();
         center.setPickOnBounds(true);
 
-        image = new ImageView(new Image(App.class.getResourceAsStream("/empty.png")));
+        image = new ImageView(new Image(App.class.getResourceAsStream("Startsida.jpg")));  // "/empty.png"
         image.setMouseTransparent(true);
         center.getChildren().add(image);
 
