@@ -12,10 +12,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -391,7 +393,7 @@ public class App extends Application {
 
         class SaveHandler implements EventHandler<ActionEvent> {
             public void handle(ActionEvent event) {
-                fileChooser.setInitialDirectory(new File("."));
+                fileChooser.setInitialDirectory(new File("./src/main/resources/saved"));
                 File fileName = fileChooser.showSaveDialog(stage);
                 if (fileName == null) {
                     return;
@@ -399,9 +401,15 @@ public class App extends Application {
                 try { 
                     PrintWriter writer = new PrintWriter(new FileWriter(fileName));
                     StringBuilder sb = new StringBuilder();
-                    sb.append(imagePath);
-                    sb.append(String.format("%n"));
-                    sb.append(listGraph.toString());
+                    sb.append(String.format("%s%n", imagePath));
+                    sb.append(String.format("%s%n", listGraph.getNodes().size()));
+                    for (City city : listGraph.getNodes()) {
+                        Collection<Edge<City>> edges = listGraph.getEdgesFrom(city);
+                        sb.append(String.format("%s%n%d%n", city.toString(), edges.size()));
+                        for (Edge<City> edge : edges) {
+                            sb.append(String.format("%s%n", edge.toString()));
+                        }
+                    }
                     writer.print(sb);
                     writer.close();
                     hasUnsavedChanges = false;
@@ -438,7 +446,7 @@ public class App extends Application {
 
         class OpenHandler implements EventHandler<ActionEvent> {
             public void handle(ActionEvent event) {
-                fileChooser.setInitialDirectory(new File("."));
+                fileChooser.setInitialDirectory(new File("./src/main/resources/saved"));
 
                 File fileName = fileChooser.showOpenDialog(stage);
                 if (fileName == null) return;
@@ -449,7 +457,7 @@ public class App extends Application {
                     int numberOfNodes = Integer.parseInt(reader.readLine());
                     for (int i = 0; i < numberOfNodes; i++) {
                         String[] node = reader.readLine().split(";");
-                        City city = new City(node[0], Double.parseDouble(node[1]), Double.parseDouble(node[2]))
+                        City city = new City(node[0], Double.parseDouble(node[1]), Double.parseDouble(node[2]));
                         listGraph.add(city);
                         int numberOfEdges = Integer.parseInt(reader.readLine());
                         for (int j = 0; j < numberOfEdges; j++) {
@@ -465,11 +473,10 @@ public class App extends Application {
                     root.setRight(right);
                     stage.sizeToScene();
                     redrawCitiesFromGraph();
-                    //redrawEdgesFromGraph();
 
                     obsList.clear();
                     obsList.addAll(listGraph.getNodes().toString());
-
+ 
                     hasUnsavedChanges = false;
                     save.setDisable(true);
 
@@ -478,12 +485,6 @@ public class App extends Application {
                     alert.showAndWait();
                     e.printStackTrace();
 
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-
-                    Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte läsas in.");
-                    alert.setHeaderText("Fel vid öppning");
-                    alert.showAndWait();
                 }
             }
         }
