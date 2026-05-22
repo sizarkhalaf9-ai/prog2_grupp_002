@@ -52,8 +52,7 @@ public class City implements Serializable {
 
   @Override
   public String toString() {
-    return this.name;
-    //+ "; " + this.x + "; " + this.y;
+    return this.name + "; " + this.x + "; " + this.y;
   }
 }
 
