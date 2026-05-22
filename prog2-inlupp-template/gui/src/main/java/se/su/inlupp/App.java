@@ -46,6 +46,11 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import se.su.inlupp.App.OpenHandler;
+import se.su.inlupp.App.RemoveNodeHandler;
+import se.su.inlupp.App.SaveHandler;
+import se.su.inlupp.App.SaveImageHandler;
+import se.su.inlupp.App.StartAddEdgeHandler;
 
 public class App extends Application {
 
@@ -86,7 +91,7 @@ public class App extends Application {
         center = new Pane();
         center.setPickOnBounds(true);
 
-        image = new ImageView(new Image(App.class.getResourceAsStream("Startsida.jpg")));  // "/empty.png"
+        image = new ImageView(new Image(App.class.getResourceAsStream("/maps/Startsida.jpg")));  // "/Startsida.jpg", prog2-inlupp-template/gui/src/main/resources/maps/Startsida.jpg, "/empty.png"
         image.setMouseTransparent(true);
         center.getChildren().add(image);
 
@@ -130,6 +135,8 @@ public class App extends Application {
 
         addEdgeButton = new Button("Lägg till kant");
         addEdgeButton.setOnAction(new StartAddEdgeHandler());
+
+        // lägg till knappen med namn "Information om väg"
 
         List<Button> rightButtons = List.of(
                 addNodeButton,
@@ -310,11 +317,16 @@ public class App extends Application {
                             alert.setTitle("Error");
                             alert.setHeaderText("Inget namn har angivits");
                             alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
+
+                            ButtonType tryAgainButton = new ButtonType("Försök igen");
+
+                            alert.getButtonTypes().setAll(tryAgainButton);
+
                             Optional<ButtonType> alertAnswer = alert.showAndWait();
-                            if (!alertAnswer.isPresent()){
+                            if (alertAnswer.isEmpty()){
                                 return;
                             } 
-                            
+
                         } else { 
                             putNodeHandler = new PutNodeHandler();
                             center.setOnMouseClicked(putNodeHandler);
