@@ -310,7 +310,11 @@ public class App extends Application {
                             alert.setTitle("Error");
                             alert.setHeaderText("Inget namn har angivits");
                             alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
-                            alert.showAndWait();
+                            Optional<ButtonType> alertAnswer = alert.showAndWait();
+                            if (!alertAnswer.isPresent()){
+                                return;
+                            } 
+                            
                         } else { 
                             putNodeHandler = new PutNodeHandler();
                             center.setOnMouseClicked(putNodeHandler);
