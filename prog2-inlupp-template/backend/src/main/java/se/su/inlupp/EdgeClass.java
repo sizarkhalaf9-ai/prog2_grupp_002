@@ -31,9 +31,8 @@ public class EdgeClass<T> implements Edge<T>, Serializable {
         return this.name;
     }
 
+    @Override
     public String toString() {
-        return "till " + destination.toString() + " med " + name + " tar " + weight;
+        return "till " + destination + " med " + name + " tar " + weight;
     }
-
-    
 }

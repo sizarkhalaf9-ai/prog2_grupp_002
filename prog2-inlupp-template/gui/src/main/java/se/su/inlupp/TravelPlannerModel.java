@@ -6,6 +6,10 @@ public class TravelPlannerModel {
     private Graph<City> graph;
     private PathFinder<City> pathFinder;
 
+
+    public static void main(String[] args) {
+    }
+
     public TravelPlannerModel(){
         graph = new ListGraph<>();
     }

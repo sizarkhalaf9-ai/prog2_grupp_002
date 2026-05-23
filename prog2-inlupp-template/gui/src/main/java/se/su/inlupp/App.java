@@ -1,20 +1,25 @@
 package se.su.inlupp;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -44,8 +49,19 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import se.su.inlupp.App.AddNodeHandler;
+import se.su.inlupp.App.CloseWindowHandler;
+import se.su.inlupp.App.ExitHandler;
+import se.su.inlupp.App.NewMapHandler;
+import se.su.inlupp.App.OpenHandler;
+import se.su.inlupp.App.PutNodeHandler;
+import se.su.inlupp.App.RemoveNodeHandler;
+import se.su.inlupp.App.SaveHandler;
+import se.su.inlupp.App.SaveImageHandler;
+import se.su.inlupp.App.StartAddEdgeHandler;
 
 public class App extends Application {
 
@@ -78,6 +94,9 @@ public class App extends Application {
     private Graph<City> listGraph = new ListGraph<City>();
     private Destination needle;
 
+    private ObservableList<String> obsList = FXCollections.observableArrayList();
+
+
     @Override
     public void start(Stage stage) {
         this.stage = stage;
@@ -94,7 +113,7 @@ public class App extends Application {
 
         Menu file = new Menu("Arkiv");
         MenuItem newMap = new MenuItem("Ny");
-        newMap.setOnAction(new NewMapHandler());
+        newMap.setOnAction(new NewMapLoader());
 
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
@@ -169,18 +188,7 @@ public class App extends Application {
         stage.show();
     }
 
-    public class NewMapChooser extends Dialog<ButtonType> {
-        public static final ButtonType KARTA1 = new ButtonType("Sverigekarta med angränsande länder");
-        public static final ButtonType KARTA2 = new ButtonType("Sverigekarta utan grannländer");
-
-        public NewMapChooser() {
-            setTitle("Välj karta");
-            setHeaderText("Välj en karta som du vill jobba med");
-            getDialogPane().getButtonTypes().addAll(KARTA1, KARTA2, ButtonType.CANCEL);
-        }
-    }
-
-    class NewMapHandler implements EventHandler<ActionEvent> {
+    public class NewMapLoader implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             if (hasUnsavedChanges) {
                 Alert alert = new Alert(AlertType.CONFIRMATION,
@@ -191,33 +199,34 @@ public class App extends Application {
                     return;
                 }
             }
-            NewMapChooser mapChooser = new NewMapChooser();
-            Optional<ButtonType> mapChoice = mapChooser.showAndWait();
-            if (mapChoice.isPresent() && mapChoice.get() != ButtonType.CANCEL) {
-                center.getChildren().clear();
-                listGraph = new ListGraph<>();
-                cityDestinations.clear();
-                selectedCity = null;
-                firstEdgeCity = null;
-                choosingSecondCityForEdge = false;
-                needle = null;
-                hasUnsavedChanges = false;
-                save.setDisable(true);
 
-                if (mapChoice.get() == NewMapChooser.KARTA1) {
-                    image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta2.jpg")));
-                    imagePath = "/maps/sverigekarta2.jpg";
-                } else if (mapChoice.get() == NewMapChooser.KARTA2) {
-                    image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
-                    imagePath = "/maps/sverigekarta1.jpg";
-                }
-                image.setMouseTransparent(true);
-                center.getChildren().add(image);
-
-                root.setRight(right);
-                stage.sizeToScene();
+            fileChooser.setInitialDirectory(new File("./src/main/resources/maps"));
+            fileChooser.setTitle("Välj en karta du vill använda.");
+            fileChooser.getExtensionFilters().add(
+                    new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
+            File fileName = fileChooser.showOpenDialog(stage);
+            if (fileName == null) return;   
+            String fileURI;
+            try {
+                fileURI = fileName.toURI().toURL().toString();
+                image = new ImageView(new Image(fileURI));
+            } catch (MalformedURLException e) {
             }
-        }
+
+            center.getChildren().clear();
+            listGraph = new ListGraph<>();
+            cityDestinations.clear();
+            selectedCity = null;
+            firstEdgeCity = null;
+            choosingSecondCityForEdge = false;
+            needle = null;
+            hasUnsavedChanges = false;
+            save.setDisable(true);
+            
+            center.getChildren().add(image);
+            root.setRight(right);
+            stage.sizeToScene();
+        } 
     }
 
     class CloseWindowHandler implements EventHandler<ActionEvent> {
@@ -586,23 +595,75 @@ public class App extends Application {
         redrawEdgesFromGraph();
     }
 
-    class SaveHandler implements EventHandler<ActionEvent> {
+    class OpenHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
-            fileChooser.setInitialDirectory(new File("."));
-            File fileName = fileChooser.showSaveDialog(stage);
-            if (fileName == null) {
-                return;
-            }
+            fileChooser.setInitialDirectory(new File("./src/main/resources/saved"));
+            File fileName = fileChooser.showOpenDialog(stage);
+            if (fileName == null) return;
+
+            listGraph = new ListGraph<>();
+            cityDestinations.clear();
+            center.getChildren().clear();
 
             try {
-                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName));
-                oos.writeObject(imagePath);
-                oos.writeObject(listGraph);
-                oos.close();
+                BufferedReader reader = new BufferedReader(new FileReader(fileName));
+                imagePath = reader.readLine();
+                int numberOfNodes = Integer.parseInt(reader.readLine());
+                Map<String, City> cities = new HashMap<>();
+                for (int i = 0; i < numberOfNodes; i++) {
+                    String[] node = reader.readLine().split(" ");
+                    City city = new City(node[0], Double.parseDouble(node[1]), Double.parseDouble(node[2]));
+                    listGraph.add(city);
+                    cities.put(node[0], city);    
+                }
+
+                for (int i = 0; i < numberOfNodes; i++) {
+                    String[] node = reader.readLine().split(" ");
+                    City city = cities.get(node[0]);
+                    int numberOfEdges = Integer.parseInt(reader.readLine());
+                    for (int j = 0; j < numberOfEdges; j++) {
+                        String[] edge = reader.readLine().split(" ");
+                        City destination = cities.get(edge[1]);
+                        try {
+                            listGraph.connect(city, destination, edge[5], Integer.parseInt(edge[7]));
+                        } catch (IllegalStateException e) {}
+                    }
+                }
+                reader.close();
+
+                image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
+                center.getChildren().add(image);
+                redrawCitiesFromGraph();
+                root.setRight(right);
+                stage.sizeToScene();
+                obsList.clear();
+                obsList.addAll(listGraph.getNodes().toString());
 
                 hasUnsavedChanges = false;
                 save.setDisable(true);
 
+            } catch (IOException | NumberFormatException | StringIndexOutOfBoundsException e) {
+                Alert alert = new Alert(AlertType.ERROR, "Fel vid inläsning: Filen är skadad eller har fel format.");
+                alert.showAndWait();
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class SaveHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            fileChooser.setInitialDirectory(new File("./src/main/resources/saved"));
+            File fileName = fileChooser.showSaveDialog(stage);
+            if (fileName == null) {
+                return;
+            }
+            try { 
+                PrintWriter writer = new PrintWriter(new FileWriter(fileName));
+                writer.println(imagePath);
+                writer.print(listGraph.toString());
+                writer.close();
+                hasUnsavedChanges = false;
+                save.setDisable(true);
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -628,48 +689,6 @@ public class App extends Application {
 
             } catch (IOException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "IO Error");
-                alert.showAndWait();
-            }
-        }
-    }
-
-    class OpenHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent event) {
-            fileChooser.setInitialDirectory(new File("."));
-
-            File fileName = fileChooser.showOpenDialog(stage);
-
-            if (fileName == null) {
-                return;
-            }
-
-            try {
-                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
-                imagePath = (String) inputStream.readObject();
-                listGraph = (Graph<City>) inputStream.readObject();
-                inputStream.close();
-
-                image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
-                image.setMouseTransparent(true);
-                center.getChildren().clear();
-                center.getChildren().add(image);
-                root.setRight(right);
-                stage.sizeToScene();
-                redrawCitiesFromGraph();
-
-                hasUnsavedChanges = false;
-                save.setDisable(true);
-
-            } catch (IOException e) {
-                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte hittas");
-                alert.showAndWait();
-                e.printStackTrace();
-
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-
-                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte läsas in.");
-                alert.setHeaderText("Fel vid öppning");
                 alert.showAndWait();
             }
         }

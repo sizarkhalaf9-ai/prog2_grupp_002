@@ -110,15 +110,20 @@ public class ListGraph<T> implements Graph<T>, Serializable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     Set<T> allNodes = getNodes();
+    sb.append(String.format("%d%n", allNodes.size()));
     for (T node : allNodes) {
-      sb.append(node.toString() + ", ");
+        sb.append(String.format("%s%n", node.toString()));
+    }
+    for (T node : allNodes) {
+      sb.append(String.format("%s%n", node.toString()));
+      sb.append(String.format("%d%n", getEdgesFrom(node).size()));
       for (Edge<T> edge : getEdgesFrom(node)) {
-        sb.append(edge.toString() + ", ");
+        sb.append(String.format("%s%n", edge.toString()));
       }
     }
-    String string = sb.toString();
-  
-    return string.substring(0, string.length() - 1);
+    //String string = sb.toString();
+    //return string.substring(0, string.length() - 1);
+    return sb.toString();
   }
 
   @Override
