@@ -46,6 +46,6 @@ public class EdgeClass<T> implements Edge<T>, Serializable {
     }
 
     public String toString() {
-        return destination.toString() + "; " + name + "; " + weight;
+        return "till " + destination.toString() + " med " + name + " tar " + weight;
     }
 }

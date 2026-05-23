@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -105,7 +107,7 @@ public class App extends Application {
         
         Menu file = new Menu("Arkiv");
         MenuItem newMap = new MenuItem("Ny");
-        newMap.setOnAction(new NewMapHandler());
+        newMap.setOnAction(new NewMapLoader());
         MenuItem open = new MenuItem("Öppna...");
         OpenHandler openHandler = new OpenHandler();
         open.setOnAction(openHandler);
@@ -177,18 +179,7 @@ public class App extends Application {
         stage.show();
     }
 
-    public class NewMapChooser extends Dialog<ButtonType> {
-        public static final ButtonType KARTA1 = new ButtonType("Sverigekarta med angränsande länder");
-        public static final ButtonType KARTA2 = new ButtonType("Sverigekarta utan grannländer");
-
-        public NewMapChooser() {
-            setTitle("Välj karta");
-            setHeaderText("Välj en karta som du vill jobba med");
-            getDialogPane().getButtonTypes().addAll(KARTA1, KARTA2, ButtonType.CANCEL);
-        }
-    }
-
-    class NewMapHandler implements EventHandler<ActionEvent> {
+    public class NewMapLoader implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             if (hasUnsavedChanges) {
                 Alert alert = new Alert(AlertType.CONFIRMATION,
@@ -199,28 +190,32 @@ public class App extends Application {
                     return;
                 }
             }
-            NewMapChooser mapChooser = new NewMapChooser();
-            Optional<ButtonType> mapChoice = mapChooser.showAndWait();
-            if (mapChoice.isPresent() && mapChoice.get() != ButtonType.CANCEL) {
-                center.getChildren().clear();
-                listGraph = new ListGraph<>();
-                cityDestinations.clear();
-                hasUnsavedChanges = false;
-                save.setDisable(true);
 
-                if (mapChoice.get() == NewMapChooser.KARTA1) {
-                    image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta2.jpg")));
-                    imagePath = "/maps/sverigekarta2.jpg";
-                } else if (mapChoice.get() == NewMapChooser.KARTA2) {
-                    image = new ImageView(new Image(App.class.getResourceAsStream("/maps/sverigekarta1.jpg")));
-                    imagePath = "/maps/sverigekarta1.jpg";
-                }
-                center.getChildren().add(image);
-
-                root.setRight(right);
-                stage.sizeToScene();
+            fileChooser.setInitialDirectory(new File("./src/main/resources/maps"));
+            fileChooser.setTitle("Välj en karta du vill använda.");
+            fileChooser.getExtensionFilters().add(
+                    new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
+            File fileName = fileChooser.showOpenDialog(stage);
+            if (fileName == null) return;   
+            String fileURI;
+            try {
+                fileURI = fileName.toURI().toURL().toString();
+                image = new ImageView(new Image(fileURI));
+            } catch (MalformedURLException e) {
             }
-        }
+
+            center.getChildren().clear();
+            listGraph = new ListGraph<>();
+            cityDestinations.clear();
+            selectedCity = null;
+            needle = null;
+            hasUnsavedChanges = false;
+            save.setDisable(true);
+            
+            center.getChildren().add(image);
+            root.setRight(right);
+            stage.sizeToScene();
+        } 
     }
 
     class CloseWindowHandler implements EventHandler<ActionEvent> {
