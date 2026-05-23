@@ -1,0 +1,17 @@
+file:/Users/julia/Desktop/DSV/VT26/PROG2/prog2_grupp_002/prog2-inlupp-template/gui/src/main/resources/maps/sverigekarta2.jpg
+3
+St 188.0 470.5
+Ma 69.0 635.5
+Gö 48.0 540.5
+St 188.0 470.5
+2
+till Gö 48.0 540.5 med Tåg tar 4
+till Ma 69.0 635.5 med Tåg tar 6
+Ma 69.0 635.5
+2
+till St 188.0 470.5 med Tåg tar 6
+till Gö 48.0 540.5 med Tåg tar 3
+Gö 48.0 540.5
+2
+till Ma 69.0 635.5 med Tåg tar 3
+till St 188.0 470.5 med Tåg tar 4

@@ -52,16 +52,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import se.su.inlupp.App.AddNodeHandler;
-import se.su.inlupp.App.CloseWindowHandler;
-import se.su.inlupp.App.ExitHandler;
-import se.su.inlupp.App.NewMapHandler;
-import se.su.inlupp.App.OpenHandler;
-import se.su.inlupp.App.PutNodeHandler;
-import se.su.inlupp.App.RemoveNodeHandler;
-import se.su.inlupp.App.SaveHandler;
-import se.su.inlupp.App.SaveImageHandler;
-import se.su.inlupp.App.StartAddEdgeHandler;
 
 public class App extends Application {
 
@@ -205,14 +195,15 @@ public class App extends Application {
             fileChooser.getExtensionFilters().add(
                     new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
             File fileName = fileChooser.showOpenDialog(stage);
+            fileChooser.getExtensionFilters().clear();
+
             if (fileName == null) return;   
-            String fileURI;
             try {
-                fileURI = fileName.toURI().toURL().toString();
-                image = new ImageView(new Image(fileURI));
+                imagePath = fileName.toURI().toURL().toString();
+                image = new ImageView(new Image(imagePath));
+                //image = new ImageView(new Image(imagePath.substring(imagePath.indexOf("resources" + 9))));
             } catch (MalformedURLException e) {
             }
-
             center.getChildren().clear();
             listGraph = new ListGraph<>();
             cityDestinations.clear();
@@ -634,8 +625,8 @@ public class App extends Application {
                     }
                 }
                 reader.close();
-
-                image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
+                image = new ImageView(new Image(imagePath));
+                //image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
                 center.getChildren().add(image);
                 redrawCitiesFromGraph();
                 root.setRight(right);
