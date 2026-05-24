@@ -14,12 +14,8 @@ import javafx.scene.layout.StackPane;
 public class Destination extends Pane {
 
     /*
-     * ÄNDRING: Dessa konstanter används för att få bättre kontroll över var nålen,
-     * namnet och linjerna ska placeras.
-     * 
-     * NODE_WIDTH är hela komponentens bredd, alltså nål + namn.
-     * NEEDLE_SIZE är själva nålbildens storlek.
-     * MARKER_BOX_SIZE är den lilla rutan runt nålen när noden är markerad.
+     * Dessa konstanter används för att kontrollera storlek och placering
+     * av noden, nålen, namnet och markeringsrutan.
      */
     private static final double NODE_WIDTH = 80;
     private static final double NODE_HEIGHT = 45;
@@ -27,10 +23,11 @@ public class Destination extends Pane {
     private static final double MARKER_BOX_SIZE = 24;
 
     /*
-     * ÄNDRING:
-     * Dessa används för att veta exakt var mitten av nålen är.
-     * Linjer mellan noder ska kopplas till mitten av nålen, inte till texten under
-     * noden.
+     * NEEDLE_CENTER_X och NEEDLE_CENTER_Y anger var nålens centrum är
+     * inuti hela Destination-komponenten.
+     *
+     * Detta används när vi ritar linjer mellan noder.
+     * Linjen ska gå till själva nålen, inte till texten under noden.
      */
     private static final double NEEDLE_CENTER_X = NODE_WIDTH / 2;
     private static final double NEEDLE_CENTER_Y = NEEDLE_SIZE / 2;
@@ -43,18 +40,21 @@ public class Destination extends Pane {
     private String name;
 
     /*
-     * ÄNDRING:
      * positionChanged är en callback.
-     * App.java kan sätta denna så att App får veta när en nod flyttas.
+     *
+     * App.java sätter denna callback.
+     * När noden flyttas med mus eller piltangenter körs callbacken.
      * Då kan App.java rita om alla kantlinjer.
      */
     private Runnable positionChanged;
 
     /*
-     * ÄNDRING:
-     * markerBox är bara den lilla rutan runt nålen.
-     * Tidigare markerades hela Destination, alltså både nål och namn.
-     * Då blev den röda markeringsrutan för stor.
+     * markerBox är den lilla rutan som bara innehåller nålen.
+     *
+     * Tidigare sattes röd markering på hela Destination,
+     * alltså både nål och namn. Då blev den röda rutan för stor.
+     *
+     * Nu sätter vi röd ram bara på markerBox.
      */
     private StackPane markerBox;
 
@@ -64,30 +64,27 @@ public class Destination extends Pane {
         newY = y;
 
         /*
-         * ÄNDRING:
-         * Vi placerar hela Destination så att nålens mittpunkt hamnar på newX/newY.
-         * Därför flyttar vi komponenten med -NEEDLE_CENTER_X och -NEEDLE_CENTER_Y.
+         * Flyttar hela Destination så att nålens centrum hamnar på newX/newY.
          */
         relocate(newX - NEEDLE_CENTER_X, newY - NEEDLE_CENTER_Y);
 
         /*
-         * Laddar in nålbilden från resources.
-         * Hos er fungerar /nål.png.
+         * Laddar nålbilden från resources.
+         * Filen ska ligga i resources och heta nål.png.
          */
         ImageView image = new ImageView(new Image(Destination.class.getResourceAsStream("/nål.png")));
         image.setFitHeight(NEEDLE_SIZE);
         image.setFitWidth(NEEDLE_SIZE);
 
         /*
-         * Gör att själva bilden inte blockerar musklick.
-         * Klicket ska fångas av hela Destination-komponenten.
+         * Bilden ska inte fånga musklick.
+         * Klicket ska hanteras av Destination-komponenten.
          */
         image.setMouseTransparent(true);
 
         /*
-         * ÄNDRING:
-         * Nålbilden läggs i markerBox.
-         * Det är markerBox som får röd ram när noden markeras.
+         * markerBox innehåller nålbilden.
+         * Det är denna lilla box som får röd ram när noden markeras.
          */
         markerBox = new StackPane(image);
         markerBox.setPrefSize(MARKER_BOX_SIZE, MARKER_BOX_SIZE);
@@ -95,19 +92,20 @@ public class Destination extends Pane {
         markerBox.setMaxSize(MARKER_BOX_SIZE, MARKER_BOX_SIZE);
         markerBox.setAlignment(Pos.CENTER);
 
-        // Placerar markerBox centrerad i Destination.
-
+        /*
+         * Placerar markerBox centrerad horisontellt i hela Destination.
+         */
         markerBox.setLayoutX(NEEDLE_CENTER_X - MARKER_BOX_SIZE / 2);
         markerBox.setLayoutY(0);
 
         /*
          * markerBox ska inte blockera klick.
-         * Hela Destination fångar klicket.
          */
         markerBox.setMouseTransparent(true);
 
-        // ÄNDRING: Stadens namn visas under nålen.
-
+        /*
+         * Labeln visar stadens namn under nålen.
+         */
         Label nameLabel = new Label(name);
         nameLabel.setPrefWidth(NODE_WIDTH);
         nameLabel.setAlignment(Pos.CENTER);
@@ -121,7 +119,7 @@ public class Destination extends Pane {
                         "-fx-background-color: rgba(255,255,255,0.7);");
 
         /*
-         * Destination består nu av:
+         * Destination består av två delar:
          * 1. markerBox med nålen
          * 2. nameLabel med stadens namn
          */
@@ -131,16 +129,19 @@ public class Destination extends Pane {
         setMinSize(NODE_WIDTH, NODE_HEIGHT);
         setMaxSize(NODE_WIDTH, NODE_HEIGHT);
 
-        // Gör Destination klickbar även om man klickar inom dess tomma yta.
-
+        /*
+         * Gör att noden kan klickas även om man klickar inom dess tomma yta.
+         */
         setPickOnBounds(true);
 
         /*
-         * Gör att Destination kan få tangentbordsfokus,
-         * så att piltangenter kan flytta noden.
+         * Behövs för att noden ska kunna flyttas med piltangenter.
          */
         setFocusTraversable(true);
 
+        /*
+         * Kopplar mus- och tangentbordshändelser till noden.
+         */
         setOnMousePressed(new StartDragHandler());
         setOnMouseDragged(new DragHandler());
         setOnKeyPressed(new KeyHandler());
@@ -151,8 +152,8 @@ public class Destination extends Pane {
     }
 
     /*
-     * getX/getY returnerar nodens logiska koordinat,
-     * alltså punkten där själva nålen sitter.
+     * Returnerar nodens logiska koordinat.
+     * Denna punkt motsvarar nålens centrum.
      */
     public double getX() {
         return newX;
@@ -163,9 +164,9 @@ public class Destination extends Pane {
     }
 
     /*
-     * ÄNDRING:
-     * Dessa två metoder används av App.java när den ritar kantlinjer.
-     * Linjen ska sitta i nålens centrum, inte i texten under noden.
+     * Dessa används när App.java ritar kantlinjer.
+     *
+     * Linjen ska kopplas till nålens centrum.
      */
     public double getConnectionX() {
         return getLayoutX() + NEEDLE_CENTER_X;
@@ -176,9 +177,10 @@ public class Destination extends Pane {
     }
 
     /*
-     * ÄNDRING:
-     * App.java använder denna metod för att markera/avmarkera en nod.
-     * Bara markerBox får röd ram, inte hela Destination.
+     * Används av App.java när en nod markeras eller avmarkeras.
+     *
+     * Bara markerBox får röd ram.
+     * Därför blir markeringsrutan liten och hamnar runt själva nålen.
      */
     public void setSelected(boolean selected) {
         if (selected) {
@@ -193,9 +195,8 @@ public class Destination extends Pane {
     }
 
     /*
-     * ÄNDRING:
-     * App.java sätter denna callback.
-     * När Destination flyttas körs callbacken så att App.java kan rita om kanter.
+     * App.java använder denna för att sätta kod som ska köras
+     * när Destination flyttas.
      */
     public void setOnPositionChanged(Runnable positionChanged) {
         this.positionChanged = positionChanged;
@@ -207,39 +208,50 @@ public class Destination extends Pane {
         }
     }
 
+    /*
+     * Körs när användaren trycker ner musen på noden.
+     */
     class StartDragHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
             startX = event.getX();
             startY = event.getY();
 
-            // Ger noden tangentbordsfokus så att piltangenter fungerar.
-
+            /*
+             * Ger noden fokus så att piltangenter fungerar.
+             */
             requestFocus();
         }
     }
 
+    /*
+     * Körs när användaren drar noden med musen.
+     */
     class DragHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
-            // Räknar ut den nya logiska positionen för nålens centrum.
-
+            /*
+             * Räknar ut ny position för nålens centrum.
+             */
             newX = getLayoutX() + event.getX() - startX + NEEDLE_CENTER_X;
             newY = getLayoutY() + event.getY() - startY + NEEDLE_CENTER_Y;
 
             setCursor(Cursor.CLOSED_HAND);
 
-            // Flyttar hela Destination så att nålens centrum hamnar på newX/newY.
-
+            /*
+             * Flyttar hela Destination så att nålens centrum hamnar på newX/newY.
+             */
             relocate(newX - NEEDLE_CENTER_X, newY - NEEDLE_CENTER_Y);
 
             /*
-             * ÄNDRING:
-             * Meddelar App.java att noden flyttats.
+             * Meddelar App.java att noden har flyttats.
              * Då kan kantlinjerna ritas om.
              */
             notifyPositionChanged();
         }
     }
 
+    /*
+     * Gör att noden kan flyttas med piltangenter.
+     */
     class KeyHandler implements EventHandler<KeyEvent> {
         @Override
         public void handle(KeyEvent event) {
@@ -263,13 +275,13 @@ public class Destination extends Pane {
             relocate(newX - NEEDLE_CENTER_X, newY - NEEDLE_CENTER_Y);
 
             /*
-             * ÄNDRING:
-             * Även när noden flyttas med piltangenter ska kanterna följa med.
+             * Kanter ska följa med även när noden flyttas med piltangenter.
              */
             notifyPositionChanged();
 
-            // Stoppar tangenttrycket från att skickas vidare.
-
+            /*
+             * Stoppar tangenttrycket från att skickas vidare.
+             */
             event.consume();
         }
     }
