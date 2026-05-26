@@ -37,6 +37,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
@@ -69,6 +70,9 @@ public class App extends Application {
     private PutNodeHandler putNodeHandler;
     private String cityName;
 
+    /*
+     * Knappen som startar flödet för att lägga till en kant.
+     */
     private Button addEdgeButton;
 
     private FileChooser fileChooser = new FileChooser();
@@ -76,12 +80,70 @@ public class App extends Application {
 
     private Button saveNewNode = new Button("Spara nod");
 
+    /*
+     * selectedCity är den stad som är markerad just nu.
+     *
+     * Den används av:
+     * - Ta bort nod
+     * - Lägg till kant
+     * - Hitta väg
+     */
     private City selectedCity;
+
+    /*
+     * Dessa används för "Lägg till kant".
+     *
+     * firstEdgeCity sparar första staden i kanten.
+     * choosingSecondCityForEdge säger om nästa klick på en stad
+     * ska tolkas som kantens andra stad.
+     */
     private City firstEdgeCity;
     private boolean choosingSecondCityForEdge = false;
 
+    /*
+     * Dessa används för "Hitta väg".
+     *
+     * firstPathCity sparar startstaden.
+     * choosingSecondCityForPath säger om nästa klick på en stad
+     * ska tolkas som slutstaden.
+     */
+    private Button findPathButton;
+    private City firstPathCity;
+    private boolean choosingSecondCityForPath = false;
+
+    /*
+     * pathFinder är algoritmen som används för att hitta väg.
+     *
+     * Den är av typen PathFinder<City>, alltså ett interface.
+     * Därför kan den bytas mellan BFS, DFS och Dijkstra under körning.
+     *
+     * BFS är standard från början.
+     */
+    private PathFinder<City> pathFinder = new BFSPathFinder<>();
+
+    /*
+     * Namnet på vald algoritm.
+     * Används i dialogrutor så användaren ser vilken algoritm som används.
+     */
+    private String selectedAlgorithmName = "BFS";
+
+    /*
+     * Kopplar varje City från grafen till sin grafiska Destination på kartan.
+     */
     private Map<City, Destination> cityDestinations = new HashMap<>();
+
+    /*
+     * Själva grafen från backend.
+     *
+     * Noderna är City.
+     * Kanterna innehåller färdmedel och vikt.
+     */
     private Graph<City> listGraph = new ListGraph<City>();
+
+    /*
+     * needle är den nod som användaren precis placerat ut,
+     * men som ännu inte är sparad i grafen.
+     */
     private Destination needle;
 
     private ObservableList<String> obsList = FXCollections.observableArrayList();
@@ -95,13 +157,22 @@ public class App extends Application {
         center = new Pane();
         center.setPickOnBounds(true);
 
+        /*
+         * Startbild innan användaren har valt karta.
+         */
         image = new ImageView(new Image(App.class.getResourceAsStream("/empty.png")));
+
+        /*
+         * Kartbilden ska inte blockera klick.
+         * Klick ska gå igenom bilden till center.
+         */
         image.setMouseTransparent(true);
         center.getChildren().add(image);
 
         root.setCenter(center);
 
         Menu file = new Menu("Arkiv");
+
         MenuItem newMap = new MenuItem("Ny");
         newMap.setOnAction(new NewMapLoader());
 
@@ -114,11 +185,13 @@ public class App extends Application {
         MenuItem saveImage = new MenuItem("Bild");
         save.getItems().addAll(saveGraph, saveImage);
         save.setDisable(true);
+
         saveGraph.setOnAction(new SaveHandler());
         saveImage.setOnAction(new SaveImageHandler());
 
         MenuItem exit = new MenuItem("Avsluta");
         exit.setOnAction(new CloseWindowHandler());
+
         file.getItems().addAll(newMap, open, save, exit);
 
         MenuBar top = new MenuBar(file);
@@ -134,28 +207,87 @@ public class App extends Application {
 
         saveNewNode.setDisable(true);
 
+        /*
+         * Ta bort nod-knappen.
+         *
+         * Den tar bort den markerade staden från både grafen och kartan.
+         */
         Button removeNodeButton = new Button("Ta bort nod");
         removeNodeButton.setOnAction(new RemoveNodeHandler());
 
+        /*
+         * Lägg till kant-knappen.
+         *
+         * Flöde:
+         * 1. Markera en stad.
+         * 2. Tryck "Lägg till kant".
+         * 3. Klicka på nästa stad.
+         * 4. Fyll i färdmedel och vikt.
+         */
         addEdgeButton = new Button("Lägg till kant");
         addEdgeButton.setOnAction(new StartAddEdgeHandler());
+
+        /*
+         * Hitta väg-knappen.
+         *
+         * Flöde:
+         * 1. Markera startstad.
+         * 2. Tryck "Hitta väg".
+         * 3. Klicka på slutstad.
+         * 4. Vald algoritm används.
+         */
+        findPathButton = new Button("Hitta väg");
+        findPathButton.setOnAction(new StartFindPathHandler());
 
         List<Button> rightButtons = List.of(
                 addNodeButton,
                 saveNewNode,
                 removeNodeButton,
-                addEdgeButton);
+                addEdgeButton,
+                findPathButton);
+
         for (Button button : rightButtons) {
             button.setPrefWidth(110);
             button.setTextAlignment(TextAlignment.CENTER);
         }
 
-        MenuButton algorithmButton = new MenuButton("Välj\nSökalgoritm");
+        /*
+         * Algoritmknappen visar BFS från början eftersom BFS är standard.
+         */
+        MenuButton algorithmButton = new MenuButton("BFS");
         algorithmButton.setPrefWidth(110);
 
+        /*
+         * DFS-valet.
+         *
+         * När användaren väljer DFS byts pathFinder-objektet.
+         */
         MenuItem dfs = new MenuItem("Djupet först-sökning");
+        dfs.setOnAction(event -> {
+            pathFinder = new DFSPathFinder<>();
+            selectedAlgorithmName = "DFS";
+            algorithmButton.setText("DFS");
+        });
+
+        /*
+         * BFS-valet.
+         */
         MenuItem bfs = new MenuItem("Bredden först-sökning");
+        bfs.setOnAction(event -> {
+            pathFinder = new BFSPathFinder<>();
+            selectedAlgorithmName = "BFS";
+            algorithmButton.setText("BFS");
+        });
+
+        /*
+         * Dijkstra-valet.
+         */
         MenuItem dijkstra = new MenuItem("Dijkstras algoritm");
+        dijkstra.setOnAction(event -> {
+            pathFinder = new DijkstraPathFinder<>();
+            selectedAlgorithmName = "Dijkstra";
+            algorithmButton.setText("Dijkstra");
+        });
 
         algorithmButton.getItems().addAll(dfs, bfs, dijkstra);
 
@@ -165,6 +297,7 @@ public class App extends Application {
                 saveNewNode,
                 removeNodeButton,
                 addEdgeButton,
+                findPathButton,
                 algorithmButton);
 
         right.setAlignment(Pos.TOP_CENTER);
@@ -185,6 +318,7 @@ public class App extends Application {
                         "Det finns osparade ändringar. Vill du skapa en ny ändå?");
                 alert.setHeaderText("Osparade ändringar");
                 Optional<ButtonType> choice = alert.showAndWait();
+
                 if (choice.isEmpty() || choice.get() == ButtonType.CANCEL) {
                     return;
                 }
@@ -244,6 +378,9 @@ public class App extends Application {
         }
     }
 
+    /*
+     * Sparar den nod som användaren har placerat ut på kartan.
+     */
     class SaveNewNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             if (needle == null) {
@@ -262,15 +399,26 @@ public class App extends Application {
                 return;
             }
 
-            needle.lock();
+            /*
+             * Kopplar klick- och flyttbeteende till noden.
+             */
             attachDestinationHandlers(city, needle);
+
+            /*
+             * Lägger till staden i grafen.
+             */
             listGraph.add(city);
+
+            /*
+             * Kopplar City-objektet till dess Destination på kartan.
+             */
             cityDestinations.put(city, needle);
 
             needle = null;
             center.setOnMouseClicked(null);
             center.setCursor(Cursor.DEFAULT);
             addNodeButton.setDisable(false);
+
             hasUnsavedChanges = true;
             save.setDisable(false);
             saveNewNode.setDisable(true);
@@ -279,6 +427,9 @@ public class App extends Application {
         }
     }
 
+    /*
+     * Körs när användaren klickar på kartan för att placera ut en stad.
+     */
     class PutNodeHandler implements EventHandler<MouseEvent> {
         public void handle(MouseEvent event) {
             if (needle != null) {
@@ -295,44 +446,61 @@ public class App extends Application {
         }
     }
 
+    /*
+     * Startar flödet för att lägga till stad.
+     */
     class AddNodeHandler implements EventHandler<ActionEvent> {
-            public void handle(ActionEvent event) {
-                boolean continueLoop = true;
-                while (continueLoop) {
-                    TextInputDialog dialog = new TextInputDialog();
-                    dialog.setTitle("Lägg till stad");
-                    dialog.setHeaderText("Ange namnet på staden");
-                    Optional<String> result = dialog.showAndWait();
-                    if (result.isPresent()) {
-                        cityName = result.get().trim();
-                        if (cityName.isEmpty()) {
-                            Alert alert = new Alert(AlertType.ERROR);
-                            alert.setTitle("Error");
-                            alert.setHeaderText("Inget namn har angivits");
-                            alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
-                            Optional<ButtonType> alertAnswer = alert.showAndWait();
-                            if (!alertAnswer.isPresent()){
-                                return;
-                            } 
-                            
-                        } else { 
-                            putNodeHandler = new PutNodeHandler();
-                            center.setOnMouseClicked(putNodeHandler);
-                            center.setCursor(Cursor.CROSSHAIR);
-                            addNodeButton.setDisable(true);
+        public void handle(ActionEvent event) {
+            /*
+             * Om användaren börjar lägga till stad avbryts kantläge och vägläge.
+             */
+            choosingSecondCityForEdge = false;
+            firstEdgeCity = null;
+            choosingSecondCityForPath = false;
+            firstPathCity = null;
 
-                            break;
-                        } 
-                        
+            while (true) {
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Lägg till stad");
+                dialog.setHeaderText("Ange namnet på staden");
+
+                Optional<String> result = dialog.showAndWait();
+
+                if (result.isPresent()) {
+                    cityName = result.get().trim();
+
+                    if (cityName.isEmpty()) {
+                        Alert alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Inget namn har angivits");
+                        alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
+                        Optional<ButtonType> alertAnswer = alert.showAndWait();
+
+                        if (!alertAnswer.isPresent()) {
+                            return;
+                        }
                     } else {
-                        return;
+                        putNodeHandler = new PutNodeHandler();
+                        center.setOnMouseClicked(putNodeHandler);
+                        center.setCursor(Cursor.CROSSHAIR);
+                        addNodeButton.setDisable(true);
+                        break;
                     }
+                } else {
+                    return;
                 }
             }
         }
+    }
 
+    /*
+     * Startar kantflödet.
+     */
     class StartAddEdgeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
+            /*
+             * En första stad måste vara markerad innan kant kan skapas.
+             */
             if (selectedCity == null) {
                 Alert alert = new Alert(AlertType.WARNING,
                         "Markera först en stad och tryck sedan på Lägg till kant.");
@@ -341,8 +509,17 @@ public class App extends Application {
                 return;
             }
 
+            /*
+             * Den markerade staden sparas som första stad i kanten.
+             */
             firstEdgeCity = selectedCity;
             choosingSecondCityForEdge = true;
+
+            /*
+             * Om användaren höll på med hitta väg avbryts det läget.
+             */
+            firstPathCity = null;
+            choosingSecondCityForPath = false;
 
             Alert alert = new Alert(AlertType.INFORMATION,
                     "Klicka på nästa stad som kanten ska gå till.");
@@ -351,41 +528,73 @@ public class App extends Application {
         }
     }
 
+    /*
+     * Körs när användaren klickar på en stad.
+     *
+     * Metoden hanterar:
+     * - vanlig markering
+     * - avmarkering
+     * - andra stad för kant
+     * - slutstad för hitta väg
+     */
     private void selectCity(City city) {
-        if (!choosingSecondCityForEdge && selectedCity != null && selectedCity.equals(city)) {
+        /*
+         * Om samma stad klickas igen i vanligt läge avmarkeras den.
+         */
+        if (!choosingSecondCityForEdge && !choosingSecondCityForPath && selectedCity != null
+                && selectedCity.equals(city)) {
             Destination destination = cityDestinations.get(selectedCity);
 
             if (destination != null) {
-                destination.setStyle("");
+                destination.setSelected(false);
             }
 
             selectedCity = null;
             firstEdgeCity = null;
             choosingSecondCityForEdge = false;
+            firstPathCity = null;
+            choosingSecondCityForPath = false;
             return;
         }
 
+        /*
+         * Om kantläge är aktivt används klicket som andra stad i kanten.
+         */
         if (choosingSecondCityForEdge) {
             handleSecondCityForEdge(city);
             return;
         }
 
-        if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
-            cityDestinations.get(selectedCity).setStyle("");
+        /*
+         * Om vägläge är aktivt används klicket som slutstad.
+         */
+        if (choosingSecondCityForPath) {
+            handleSecondCityForPath(city);
+            return;
         }
 
+        /*
+         * Avmarkera tidigare stad.
+         */
+        if (selectedCity != null && cityDestinations.containsKey(selectedCity)) {
+            cityDestinations.get(selectedCity).setSelected(false);
+        }
+
+        /*
+         * Markera ny stad.
+         */
         selectedCity = city;
 
         Destination destination = cityDestinations.get(city);
 
         if (destination != null) {
-            destination.setStyle(
-                    "-fx-border-color: red; " +
-                            "-fx-border-width: 3; " +
-                            "-fx-border-radius: 4;");
+            destination.setSelected(true);
         }
     }
 
+    /*
+     * Hanterar andra staden när en kant ska skapas.
+     */
     private void handleSecondCityForEdge(City secondCity) {
         if (firstEdgeCity == null) {
             choosingSecondCityForEdge = false;
@@ -400,10 +609,14 @@ public class App extends Application {
         }
 
         showEdgeDialog(firstEdgeCity, secondCity);
+
         choosingSecondCityForEdge = false;
         firstEdgeCity = null;
     }
 
+    /*
+     * Dialogruta där användaren anger färdmedel och vikt för kanten.
+     */
     private void showEdgeDialog(City from, City to) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Lägg till kant");
@@ -430,6 +643,9 @@ public class App extends Application {
 
         Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
 
+        /*
+         * Validerar input innan dialogen stängs.
+         */
         okButton.addEventFilter(ActionEvent.ACTION, actionEvent -> {
             String routeName = routeNameField.getText().trim();
             String weightText = weightField.getText().trim();
@@ -462,16 +678,26 @@ public class App extends Application {
             }
 
             try {
+                /*
+                 * Skapar kanten i grafen.
+                 */
                 listGraph.connect(from, to, routeName, weight);
+
+                /*
+                 * Ritar om alla kanter så att den nya kanten syns.
+                 */
                 redrawEdgesFromGraph();
+
                 hasUnsavedChanges = true;
                 save.setDisable(false);
+
             } catch (IllegalStateException e) {
                 Alert alert = new Alert(AlertType.WARNING,
                         "Det finns redan en kant mellan de markerade städerna.");
                 alert.setHeaderText("Kanten finns redan");
                 alert.showAndWait();
                 actionEvent.consume();
+
             } catch (RuntimeException e) {
                 Alert alert = new Alert(AlertType.ERROR,
                         "Kanten kunde inte skapas: " + e.getMessage());
@@ -484,6 +710,138 @@ public class App extends Application {
         dialog.showAndWait();
     }
 
+    /*
+     * Startar flödet för Hitta väg.
+     */
+    class StartFindPathHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            if (selectedCity == null) {
+                Alert alert = new Alert(AlertType.WARNING,
+                        "Markera först en startstad och tryck sedan på Hitta väg.");
+                alert.setHeaderText("Ingen startstad markerad");
+                alert.showAndWait();
+                return;
+            }
+
+            /*
+             * Den markerade staden blir startstad.
+             */
+            firstPathCity = selectedCity;
+            choosingSecondCityForPath = true;
+
+            /*
+             * Om kantläge var aktivt avbryts det.
+             */
+            firstEdgeCity = null;
+            choosingSecondCityForEdge = false;
+
+            Alert alert = new Alert(AlertType.INFORMATION,
+                    "Klicka på slutstaden för att söka väg med " + selectedAlgorithmName + ".");
+            alert.setHeaderText("Välj slutstad");
+            alert.showAndWait();
+        }
+    }
+
+    /*
+     * Hanterar slutstaden för Hitta väg.
+     */
+    private void handleSecondCityForPath(City secondCity) {
+        if (firstPathCity == null) {
+            choosingSecondCityForPath = false;
+            return;
+        }
+
+        if (firstPathCity.equals(secondCity)) {
+            Alert alert = new Alert(AlertType.WARNING, "Du måste välja två olika städer.");
+            alert.setHeaderText("Ogiltigt val");
+            alert.showAndWait();
+            return;
+        }
+
+        /*
+         * Själva vägberäkningen.
+         *
+         * pathFinder kan vara BFSPathFinder, DFSPathFinder eller DijkstraPathFinder
+         * beroende på vad användaren valt.
+         */
+        Path<City> path = pathFinder.findPath(listGraph, firstPathCity, secondCity);
+
+        choosingSecondCityForPath = false;
+        firstPathCity = null;
+
+        if (path == null) {
+            Alert alert = new Alert(AlertType.INFORMATION,
+                    "Det finns ingen väg mellan de valda städerna med " + selectedAlgorithmName + ".");
+            alert.setHeaderText("Ingen väg hittades");
+            alert.showAndWait();
+            return;
+        }
+
+        showPathResult(path);
+    }
+
+    /*
+     * Visar resultatet av vägberäkningen.
+     *
+     * Visar:
+     * - algoritm
+     * - startnod
+     * - slutnod
+     * - alla noder i vägen
+     * - alla kanter i vägen
+     * - total vikt
+     */
+    private void showPathResult(Path<City> path) {
+        StringBuilder result = new StringBuilder();
+
+        result.append("Algoritm: ").append(selectedAlgorithmName).append("\n");
+        result.append("Start: ").append(path.getStart().getName()).append("\n");
+        result.append("Slut: ").append(path.getEnd().getName()).append("\n\n");
+
+        result.append("Noder i vägen:\n");
+        for (City city : path.getNodes()) {
+            result.append("- ").append(city.getName()).append("\n");
+        }
+
+        result.append("\nKanter i vägen:\n");
+
+        List<City> nodes = path.getNodes();
+        List<Edge<City>> edges = path.getEdges();
+
+        for (int i = 0; i < edges.size(); i++) {
+            Edge<City> edge = edges.get(i);
+            String fromName = i < nodes.size() ? nodes.get(i).getName() : "?";
+            String toName = edge.getDestination().getName();
+
+            result.append("- ")
+                    .append(fromName)
+                    .append(" → ")
+                    .append(toName)
+                    .append(" med ")
+                    .append(edge.getName())
+                    .append(", vikt: ")
+                    .append(edge.getWeight())
+                    .append("\n");
+        }
+
+        result.append("\nTotal vikt: ").append(path.getTotalWeight());
+
+        TextArea textArea = new TextArea(result.toString());
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefWidth(450);
+        textArea.setPrefHeight(300);
+
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Hittad väg");
+        alert.setHeaderText("Väg hittad med " + selectedAlgorithmName);
+        alert.getDialogPane().setContent(textArea);
+        alert.showAndWait();
+    }
+
+    /*
+     * Tar bort markerad nod.
+     */
     class RemoveNodeHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             if (selectedCity == null) {
@@ -496,18 +854,37 @@ public class App extends Application {
             }
 
             try {
-                listGraph.remove(selectedCity);
+                City cityToRemove = selectedCity;
 
-                Destination destination = cityDestinations.remove(selectedCity);
+                /*
+                 * Tar bort staden från grafen.
+                 * ListGraph.remove ska också ta bort kanter kopplade till staden.
+                 */
+                listGraph.remove(cityToRemove);
+
+                /*
+                 * Tar bort den grafiska noden från kartan.
+                 */
+                Destination destination = cityDestinations.remove(cityToRemove);
 
                 if (destination != null) {
                     center.getChildren().remove(destination);
                 }
 
+                /*
+                 * Nollställer markeringslägen.
+                 */
                 selectedCity = null;
                 firstEdgeCity = null;
                 choosingSecondCityForEdge = false;
+                firstPathCity = null;
+                choosingSecondCityForPath = false;
+
+                /*
+                 * Ritar om kanterna så att kanter till den borttagna noden försvinner.
+                 */
                 redrawEdgesFromGraph();
+
                 hasUnsavedChanges = true;
                 save.setDisable(false);
 
@@ -521,12 +898,20 @@ public class App extends Application {
         }
     }
 
+    /*
+     * Kopplar klick och flyttning till en Destination.
+     */
     private void attachDestinationHandlers(City city, Destination destination) {
         destination.setOnMouseClicked(mouseEvent -> {
             mouseEvent.consume();
             selectCity(city);
         });
 
+        /*
+         * När noden flyttas:
+         * - uppdateras City-koordinaterna
+         * - alla kanter ritas om
+         */
         destination.setOnPositionChanged(() -> {
             city.setX(destination.getX());
             city.setY(destination.getY());
@@ -536,6 +921,9 @@ public class App extends Application {
         });
     }
 
+    /*
+     * Ritar om alla kanter i grafen.
+     */
     private void redrawEdgesFromGraph() {
         center.getChildren().removeIf(node -> node instanceof Line);
 
@@ -543,6 +931,10 @@ public class App extends Application {
             for (Edge<City> edge : listGraph.getEdgesFrom(city)) {
                 City destination = edge.getDestination();
 
+                /*
+                 * Eftersom grafen är oriktad finns samma kant från båda håll.
+                 * Denna kontroll gör att kanten bara ritas en gång.
+                 */
                 if (city.getName().compareTo(destination.getName()) < 0) {
                     drawEdge(city, destination);
                 }
@@ -550,6 +942,9 @@ public class App extends Application {
         }
     }
 
+    /*
+     * Ritar en linje mellan två städer.
+     */
     private void drawEdge(City from, City to) {
         Destination fromDestination = cityDestinations.get(from);
         Destination toDestination = cityDestinations.get(to);
@@ -558,27 +953,39 @@ public class App extends Application {
             return;
         }
 
+        /*
+         * Linjen kopplas till nålens centrum.
+         */
         Line line = new Line(
-                fromDestination.getX(),
-                fromDestination.getY(),
-                toDestination.getX(),
-                toDestination.getY());
+                fromDestination.getConnectionX(),
+                fromDestination.getConnectionY(),
+                toDestination.getConnectionX(),
+                toDestination.getConnectionY());
 
         line.setStrokeWidth(3);
         line.setMouseTransparent(true);
 
+        /*
+         * Linjen läggs bakom noderna men ovanför kartan.
+         */
         int index = Math.min(1, center.getChildren().size());
         center.getChildren().add(index, line);
     }
 
+    /*
+     * Ritar om alla noder och kanter efter att ett projekt har öppnats.
+     */
     private void redrawCitiesFromGraph() {
         center.getChildren().removeIf(node -> node instanceof Destination);
         center.getChildren().removeIf(node -> node instanceof Line);
 
         cityDestinations.clear();
+
         selectedCity = null;
         firstEdgeCity = null;
         choosingSecondCityForEdge = false;
+        firstPathCity = null;
+        choosingSecondCityForPath = false;
 
         for (City city : listGraph.getNodes()) {
             Destination destination = new Destination(city.getName(), city.getX(), city.getY());
@@ -649,6 +1056,7 @@ public class App extends Application {
         public void handle(ActionEvent event) {
             fileChooser.setInitialDirectory(new File("./src/main/resources/saved"));
             File fileName = fileChooser.showSaveDialog(stage);
+
             if (fileName == null) {
                 return;
             }
@@ -672,8 +1080,8 @@ public class App extends Application {
     class SaveImageHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             try {
-                BufferedImage image = SwingFXUtils.fromFXImage(center.snapshot(null, null), null);
-                ImageIO.write(image, "png", new File("/resources/maps/capture.png"));
+                BufferedImage snapshot = SwingFXUtils.fromFXImage(center.snapshot(null, null), null);
+                ImageIO.write(snapshot, "png", new File("/resources/maps/capture.png"));
 
                 Alert alert = new Alert(
                         Alert.AlertType.INFORMATION,
@@ -684,6 +1092,55 @@ public class App extends Application {
 
             } catch (IOException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "IO Error");
+                alert.showAndWait();
+            }
+        }
+    }
+
+    class OpenHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            fileChooser.setInitialDirectory(new File("."));
+
+            File fileName = fileChooser.showOpenDialog(stage);
+
+            if (fileName == null) {
+                return;
+            }
+
+            try {
+                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
+                imagePath = (String) inputStream.readObject();
+
+                @SuppressWarnings("unchecked")
+                Graph<City> loadedGraph = (Graph<City>) inputStream.readObject();
+
+                listGraph = loadedGraph;
+                inputStream.close();
+
+                image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
+                image.setMouseTransparent(true);
+
+                center.getChildren().clear();
+                center.getChildren().add(image);
+
+                root.setRight(right);
+                stage.sizeToScene();
+
+                redrawCitiesFromGraph();
+
+                hasUnsavedChanges = false;
+                save.setDisable(true);
+
+            } catch (IOException e) {
+                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte hittas");
+                alert.showAndWait();
+                e.printStackTrace();
+
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+
+                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte läsas in.");
+                alert.setHeaderText("Fel vid öppning");
                 alert.showAndWait();
             }
         }
