@@ -1,0 +1,17 @@
+file:/C:/Users/mashf/OneDrive%20-%20Stockholm%20University/Dokument/GitHub/prog2_grupp_002/prog2-inlupp-template/gui/src/main/resources/maps/sverigekarta1.jpg
+3
+start 156.00000000000003 70.4
+mitten 114.4 148.8
+slut 86.4 293.59999999999997
+start 156.00000000000003 70.4
+2
+till mitten 114.4 148.8 med flygande elephant tar 20
+till slut 86.4 293.59999999999997 med tåg tar 500
+mitten 114.4 148.8
+2
+till slut 86.4 293.59999999999997 med buss tar 30
+till start 156.00000000000003 70.4 med flygande elephant tar 20
+slut 86.4 293.59999999999997
+2
+till mitten 114.4 148.8 med buss tar 30
+till start 156.00000000000003 70.4 med tåg tar 500

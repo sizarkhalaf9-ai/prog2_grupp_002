@@ -1097,55 +1097,7 @@ public class App extends Application {
         }
     }
 
-    class OpenHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent event) {
-            fileChooser.setInitialDirectory(new File("."));
-
-            File fileName = fileChooser.showOpenDialog(stage);
-
-            if (fileName == null) {
-                return;
-            }
-
-            try {
-                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));
-                imagePath = (String) inputStream.readObject();
-
-                @SuppressWarnings("unchecked")
-                Graph<City> loadedGraph = (Graph<City>) inputStream.readObject();
-
-                listGraph = loadedGraph;
-                inputStream.close();
-
-                image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
-                image.setMouseTransparent(true);
-
-                center.getChildren().clear();
-                center.getChildren().add(image);
-
-                root.setRight(right);
-                stage.sizeToScene();
-
-                redrawCitiesFromGraph();
-
-                hasUnsavedChanges = false;
-                save.setDisable(true);
-
-            } catch (IOException e) {
-                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte hittas");
-                alert.showAndWait();
-                e.printStackTrace();
-
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-
-                Alert alert = new Alert(AlertType.ERROR, "Filen kunde inte läsas in.");
-                alert.setHeaderText("Fel vid öppning");
-                alert.showAndWait();
-            }
-        }
-    }
-
+    
     public static void main(String[] args) {
         launch(args);
     }
