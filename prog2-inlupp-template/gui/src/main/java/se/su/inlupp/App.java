@@ -159,7 +159,7 @@ public class App extends Application {
         /*
          * Startbild innan användaren har valt karta.
          */
-        image = new ImageView(new Image(App.class.getResourceAsStream("/empty.png")));
+        image = new ImageView(new Image(App.class.getResourceAsStream("/Startsida.jpg")));
 
         /*
          * Kartbilden ska inte blockera klick.
@@ -475,11 +475,15 @@ public class App extends Application {
                         alert.setTitle("Error");
                         alert.setHeaderText("Inget namn har angivits");
                         alert.setContentText("För att gå vidare måste du ange ett namn på en stad");
-                        Optional<ButtonType> alertAnswer = alert.showAndWait();
+                        ButtonType tryAgainButton = new ButtonType("Försök igen");
 
-                        if (!alertAnswer.isPresent()) {
+                        alert.getButtonTypes().setAll(tryAgainButton);
+
+                        Optional<ButtonType> alertAnswer = alert.showAndWait();
+                        if (alertAnswer.isEmpty()) {
                             return;
                         }
+
                     } else {
                         putNodeHandler = new PutNodeHandler();
                         center.setOnMouseClicked(putNodeHandler);
