@@ -148,7 +148,6 @@ public class App extends Application {
 
     private ObservableList<String> obsList = FXCollections.observableArrayList();
 
-
     @Override
     public void start(Stage stage) {
         this.stage = stage;
@@ -331,11 +330,13 @@ public class App extends Application {
             File fileName = fileChooser.showOpenDialog(stage);
             fileChooser.getExtensionFilters().clear();
 
-            if (fileName == null) return;   
+            if (fileName == null)
+                return;
             try {
                 imagePath = fileName.toURI().toURL().toString();
                 image = new ImageView(new Image(imagePath));
-                //image = new ImageView(new Image(imagePath.substring(imagePath.indexOf("resources" + 9))));
+                // image = new ImageView(new
+                // Image(imagePath.substring(imagePath.indexOf("resources" + 9))));
             } catch (MalformedURLException e) {
             }
             center.getChildren().clear();
@@ -347,11 +348,11 @@ public class App extends Application {
             needle = null;
             hasUnsavedChanges = false;
             save.setDisable(true);
-            
+
             center.getChildren().add(image);
             root.setRight(right);
             stage.sizeToScene();
-        } 
+        }
     }
 
     class CloseWindowHandler implements EventHandler<ActionEvent> {
@@ -1001,7 +1002,8 @@ public class App extends Application {
         public void handle(ActionEvent event) {
             fileChooser.setInitialDirectory(new File("./src/main/resources/saved"));
             File fileName = fileChooser.showOpenDialog(stage);
-            if (fileName == null) return;
+            if (fileName == null)
+                return;
 
             listGraph = new ListGraph<>();
             cityDestinations.clear();
@@ -1016,7 +1018,7 @@ public class App extends Application {
                     String[] node = reader.readLine().split(" ");
                     City city = new City(node[0], Double.parseDouble(node[1]), Double.parseDouble(node[2]));
                     listGraph.add(city);
-                    cities.put(node[0], city);    
+                    cities.put(node[0], city);
                 }
 
                 for (int i = 0; i < numberOfNodes; i++) {
@@ -1028,12 +1030,13 @@ public class App extends Application {
                         City destination = cities.get(edge[1]);
                         try {
                             listGraph.connect(city, destination, edge[5], Integer.parseInt(edge[7]));
-                        } catch (IllegalStateException e) {}
+                        } catch (IllegalStateException e) {
+                        }
                     }
                 }
                 reader.close();
                 image = new ImageView(new Image(imagePath));
-                //image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
+                // image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
                 center.getChildren().add(image);
                 redrawCitiesFromGraph();
                 root.setRight(right);
@@ -1060,7 +1063,7 @@ public class App extends Application {
             if (fileName == null) {
                 return;
             }
-            try { 
+            try {
                 PrintWriter writer = new PrintWriter(new FileWriter(fileName));
                 writer.println(imagePath);
                 writer.print(listGraph.toString());
@@ -1097,7 +1100,6 @@ public class App extends Application {
         }
     }
 
-    
     public static void main(String[] args) {
         launch(args);
     }
