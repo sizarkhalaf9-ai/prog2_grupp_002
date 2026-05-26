@@ -7,13 +7,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -332,13 +329,9 @@ public class App extends Application {
 
             if (fileName == null)
                 return;
-            try {
-                imagePath = fileName.toURI().toURL().toString();
-                image = new ImageView(new Image(imagePath));
-                // image = new ImageView(new
-                // Image(imagePath.substring(imagePath.indexOf("resources" + 9))));
-            } catch (MalformedURLException e) {
-            }
+            imagePath = "/maps/" + fileName.getName();
+            image = new ImageView(new Image(imagePath));
+            
             center.getChildren().clear();
             listGraph = new ListGraph<>();
             cityDestinations.clear();
