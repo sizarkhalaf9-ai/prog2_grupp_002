@@ -116,7 +116,7 @@ public class Destination extends Pane {
                 "-fx-font-size: 11px; " +
                         "-fx-font-weight: bold; " +
                         "-fx-text-fill: black; " +
-                        "-fx-background-color: rgba(255,255,255,0.7);");
+                        "-fx-background-color: white);");
 
         /*
          * Destination består av två delar:
@@ -249,9 +249,7 @@ public class Destination extends Pane {
         }
     }
 
-    /*
-     * Gör att noden kan flyttas med piltangenter.
-     */
+    
     class KeyHandler implements EventHandler<KeyEvent> {
         @Override
         public void handle(KeyEvent event) {
