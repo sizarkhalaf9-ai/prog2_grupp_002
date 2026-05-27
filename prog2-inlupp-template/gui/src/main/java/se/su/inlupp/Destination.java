@@ -116,7 +116,7 @@ public class Destination extends Pane {
                 "-fx-font-size: 11px; " +
                         "-fx-font-weight: bold; " +
                         "-fx-text-fill: black; " +
-                        "-fx-background-color: white);");
+                        "-fx-background-color: white;");
 
         /*
          * Destination består av två delar:
@@ -249,7 +249,6 @@ public class Destination extends Pane {
         }
     }
 
-    
     class KeyHandler implements EventHandler<KeyEvent> {
         @Override
         public void handle(KeyEvent event) {
