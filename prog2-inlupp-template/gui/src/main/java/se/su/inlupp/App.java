@@ -1027,7 +1027,10 @@ public class App extends Application {
                     }
                 }
                 reader.close();
+                
                 image = new ImageView(new Image(imagePath));
+                image.setFitHeight(800);
+                image.setPreserveRatio(true);
                 center.getChildren().add(image);
                 redrawCitiesFromGraph();
                 root.setRight(right);
