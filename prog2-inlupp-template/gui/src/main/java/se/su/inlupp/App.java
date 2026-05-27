@@ -808,7 +808,7 @@ public class App extends Application {
 
             result.append("- ")
                     .append(fromName)
-                    .append(" → ")
+                    .append(" -> ")
                     .append(toName)
                     .append(" med ")
                     .append(edge.getName())
@@ -1027,7 +1027,7 @@ public class App extends Application {
                     }
                 }
                 reader.close();
-                
+
                 image = new ImageView(new Image(imagePath));
                 image.setFitHeight(800);
                 image.setPreserveRatio(true);
