@@ -1076,7 +1076,7 @@ public class App extends Application {
         public void handle(ActionEvent event) {
             try {
                 BufferedImage snapshot = SwingFXUtils.fromFXImage(center.snapshot(null, null), null);
-                ImageIO.write(snapshot, "png", new File("/resources/maps/capture.png"));
+                ImageIO.write(snapshot, "png", new File("/resources/maps/shapshot.png"));
 
                 Alert alert = new Alert(
                         Alert.AlertType.INFORMATION,
