@@ -15,8 +15,6 @@ import java.util.Optional;
 import javax.imageio.ImageIO;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -139,8 +137,6 @@ public class App extends Application {
      * men som ännu inte är sparad i grafen.
      */
     private Destination needle;
-
-    private ObservableList<String> obsList = FXCollections.observableArrayList();
 
     @Override
     public void start(Stage stage) {
@@ -1030,13 +1026,10 @@ public class App extends Application {
                 }
                 reader.close();
                 image = new ImageView(new Image(imagePath));
-                // image = new ImageView(new Image(App.class.getResourceAsStream(imagePath)));
                 center.getChildren().add(image);
                 redrawCitiesFromGraph();
                 root.setRight(right);
                 stage.sizeToScene();
-                obsList.clear();
-                obsList.addAll(listGraph.getNodes().toString());
 
                 hasUnsavedChanges = false;
                 save.setDisable(true);
