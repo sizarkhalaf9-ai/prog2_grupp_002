@@ -200,7 +200,6 @@ public class App extends Application {
 
         saveNewNode.setDisable(true);
 
-        
         Button removeNodeButton = new Button("Ta bort nod");
         removeNodeButton.setOnAction(new RemoveNodeHandler());
 
@@ -324,7 +323,7 @@ public class App extends Application {
                 return;
             imagePath = "/maps/" + fileName.getName();
             image = new ImageView(new Image(imagePath));
-            
+
             center.getChildren().clear();
             listGraph = new ListGraph<>();
             cityDestinations.clear();
@@ -801,7 +800,12 @@ public class App extends Application {
 
         for (int i = 0; i < edges.size(); i++) {
             Edge<City> edge = edges.get(i);
-            String fromName = i < nodes.size() ? nodes.get(i).getName() : "?";
+            String fromName;
+            if (i < nodes.size()) {
+                fromName = nodes.get(i).getName();
+            } else {
+                fromName = "?";
+            }
             String toName = edge.getDestination().getName();
 
             result.append("- ")
