@@ -1,8 +1,6 @@
 package se.su.inlupp;
 
-import java.io.Serializable;
-
-public class EdgeClass<T> implements Edge<T>, Serializable {
+public class EdgeClass<T> implements Edge<T> {
     private T destination;
     private String name;
     private int weight;
