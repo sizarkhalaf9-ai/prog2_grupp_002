@@ -1,6 +1,5 @@
 package se.su.inlupp;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +8,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-public class ListGraph<T> implements Graph<T>, Serializable {
+public class ListGraph<T> implements Graph<T> {
 
   private final Map<T, Set<Edge<T>>> graph = new HashMap<>();
 
