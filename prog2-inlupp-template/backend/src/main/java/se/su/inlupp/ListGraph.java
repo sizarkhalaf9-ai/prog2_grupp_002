@@ -121,8 +121,6 @@ public class ListGraph<T> implements Graph<T>, Serializable {
         sb.append(String.format("%s%n", edge.toString()));
       }
     }
-    //String string = sb.toString();
-    //return string.substring(0, string.length() - 1);
     return sb.toString();
   }
 
