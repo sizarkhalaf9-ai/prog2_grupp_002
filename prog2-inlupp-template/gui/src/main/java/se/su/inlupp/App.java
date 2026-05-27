@@ -67,9 +67,6 @@ public class App extends Application {
     private PutNodeHandler putNodeHandler;
     private String cityName;
 
-    /*
-     * Knappen som startar flödet för att lägga till en kant.
-     */
     private Button addEdgeButton;
 
     private FileChooser fileChooser = new FileChooser();
@@ -203,11 +200,7 @@ public class App extends Application {
 
         saveNewNode.setDisable(true);
 
-        /*
-         * Ta bort nod-knappen.
-         *
-         * Den tar bort den markerade staden från både grafen och kartan.
-         */
+        
         Button removeNodeButton = new Button("Ta bort nod");
         removeNodeButton.setOnAction(new RemoveNodeHandler());
 
