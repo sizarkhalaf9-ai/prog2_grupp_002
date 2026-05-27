@@ -30,7 +30,7 @@ public class Destination extends Pane {
      * Linjen ska gå till själva nålen, inte till texten under noden.
      */
     private static final double NEEDLE_CENTER_X = NODE_WIDTH / 2;
-    private static final double NEEDLE_CENTER_Y = NEEDLE_SIZE / 2;
+    private static final double NEEDLE_CENTER_Y = NEEDLE_SIZE / 2 + 13;
 
     private double startX;
     private double startY;
