@@ -1,8 +1,6 @@
 package se.su.inlupp;
 
-import java.io.Serializable;
-
-public class City implements Serializable {
+public class City {
   private String name;
   private double x;
   private double y;
