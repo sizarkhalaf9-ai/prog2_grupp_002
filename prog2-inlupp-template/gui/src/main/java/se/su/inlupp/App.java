@@ -213,7 +213,7 @@ public class App extends Application {
         addEdgeButton.setOnAction(new StartAddEdgeHandler());
 
         Label chooseAlgorithmLabel = new Label("Välj sökalgoritm:");
-        
+
         /*
          * Hitta väg-knappen.
          *
@@ -323,7 +323,7 @@ public class App extends Application {
                 return;
             imagePath = "/maps/" + fileName.getName();
             image = new ImageView(new Image(imagePath));
-            image.setFitHeight(800);
+            image.setFitHeight(750);
             image.setPreserveRatio(true);
 
             center.getChildren().clear();
