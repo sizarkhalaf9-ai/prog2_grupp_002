@@ -1,3 +1,9 @@
+// PROG2 VT2026, Inlämningsuppgift, del 2
+// Grupp 002 
+// Julia Liu juli0873
+// Mashfi Saiyad masa1911
+// Sizar Khalaf sikh1472
+
 package se.su.inlupp;
 
 import java.awt.image.BufferedImage;
