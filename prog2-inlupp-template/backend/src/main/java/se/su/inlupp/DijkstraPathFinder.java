@@ -44,7 +44,7 @@ public class DijkstraPathFinder<T> implements PathFinder<T> {
         while (!current.equals(start) && current != null) {
             T previous = previousNode.get(current);
             nodes.add(previous);
-            edges.add(graph.getEdgeBetween(current, previous));
+            edges.add(graph.getEdgeBetween(previous, current));
             current = previous;
         }
         Collections.reverse(nodes);
