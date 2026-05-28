@@ -55,6 +55,7 @@ public class App extends Application {
     private BorderPane root;
     private Pane center;
     private Menu save;
+    private MenuItem saveGraph;
     private VBox right;
     private ImageView image;
     private String imagePath;
@@ -170,10 +171,10 @@ public class App extends Application {
         open.setOnAction(openHandler);
 
         save = new Menu("Spara...");
-        MenuItem saveGraph = new MenuItem("Projekt");
+        saveGraph = new MenuItem("Projekt");
         MenuItem saveImage = new MenuItem("Bild");
         save.getItems().addAll(saveGraph, saveImage);
-        save.setDisable(true);
+        saveGraph.setDisable(true);
 
         saveGraph.setOnAction(new SaveHandler());
         saveImage.setOnAction(new SaveImageHandler());
@@ -211,6 +212,8 @@ public class App extends Application {
         addEdgeButton = new Button("Lägg till kant");
         addEdgeButton.setOnAction(new StartAddEdgeHandler());
 
+        Label chooseAlgorithmLabel = new Label("Välj sökalgoritm:");
+        
         /*
          * Hitta väg-knappen.
          *
@@ -281,8 +284,9 @@ public class App extends Application {
                 saveNewNode,
                 removeNodeButton,
                 addEdgeButton,
-                findPathButton,
-                algorithmButton);
+                chooseAlgorithmLabel,
+                algorithmButton,
+                findPathButton);
 
         right.setAlignment(Pos.TOP_CENTER);
         right.setPadding(femPx);
@@ -330,7 +334,7 @@ public class App extends Application {
             choosingSecondCityForEdge = false;
             needle = null;
             hasUnsavedChanges = false;
-            save.setDisable(true);
+            saveGraph.setDisable(true);
 
             center.getChildren().add(image);
             root.setRight(right);
@@ -404,7 +408,7 @@ public class App extends Application {
             addNodeButton.setDisable(false);
 
             hasUnsavedChanges = true;
-            save.setDisable(false);
+            saveGraph.setDisable(false);
             saveNewNode.setDisable(true);
 
             System.out.println(listGraph.toString());
@@ -424,7 +428,7 @@ public class App extends Application {
             center.getChildren().add(needle);
 
             hasUnsavedChanges = true;
-            save.setDisable(false);
+            saveGraph.setDisable(false);
             saveNewNode.setDisable(false);
             saveNewNode.setOnAction(new SaveNewNodeHandler());
         }
@@ -677,7 +681,7 @@ public class App extends Application {
                 redrawEdgesFromGraph();
 
                 hasUnsavedChanges = true;
-                save.setDisable(false);
+                saveGraph.setDisable(false);
 
             } catch (IllegalStateException e) {
                 Alert alert = new Alert(AlertType.WARNING,
@@ -879,7 +883,7 @@ public class App extends Application {
                 redrawEdgesFromGraph();
 
                 hasUnsavedChanges = true;
-                save.setDisable(false);
+                saveGraph.setDisable(false);
 
             } catch (RuntimeException e) {
                 Alert alert = new Alert(
@@ -910,7 +914,7 @@ public class App extends Application {
             city.setY(destination.getY());
             redrawEdgesFromGraph();
             hasUnsavedChanges = true;
-            save.setDisable(false);
+            saveGraph.setDisable(false);
         });
     }
 
@@ -1037,7 +1041,7 @@ public class App extends Application {
                 stage.sizeToScene();
 
                 hasUnsavedChanges = false;
-                save.setDisable(true);
+                saveGraph.setDisable(true);
 
             } catch (IOException | NumberFormatException | StringIndexOutOfBoundsException e) {
                 Alert alert = new Alert(AlertType.ERROR, "Fel vid inläsning: Filen är skadad eller har fel format.");
@@ -1061,7 +1065,7 @@ public class App extends Application {
                 writer.print(listGraph.toString());
                 writer.close();
                 hasUnsavedChanges = false;
-                save.setDisable(true);
+                saveGraph.setDisable(true);
             } catch (IOException e) {
                 e.printStackTrace();
 
